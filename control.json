@@ -1,0 +1,8 @@
+{
+   "name": "ax-input-control",
+   "description": "Enriches ngModel with validation options and tooltip hints.",
+
+   "integration": {
+      "technology": "angular"
+   }
+}
