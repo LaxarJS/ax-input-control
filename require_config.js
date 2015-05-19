@@ -58,7 +58,7 @@ var require = {
             return angular;
          }
       },
-      'bootstrap': {
+      'bootstrap/tooltip': {
          deps: [ 'jquery' ]
       }
    }
