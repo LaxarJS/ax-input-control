@@ -7,7 +7,7 @@ define( [
    'jquery',
    'angular',
    'laxar',
-   'laxar_uikit',
+   'laxar-uikit',
    'bootstrap/tooltip',
    './lib/helpers',
    './lib/builtin_validators',
@@ -43,7 +43,7 @@ define( [
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function configValue( key, fallback ) {
-      return ax.configuration.get( 'lib.laxar_uikit.controls.input.' + key, fallback );
+      return ax.configuration.get( 'lib.laxar-uikit.controls.input.' + key, fallback );
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////

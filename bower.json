@@ -14,8 +14,8 @@
    ],
    "dependencies": {
       "jquery": ">=1.6",
-      "laxar": "^1.0.0-alpha.12",
-      "laxar_uikit": "https://github.com/LaxarJS/laxar_uikit.git#^1.0.0-alpha.6",
+      "laxar": "^1.0.0-alpha.14",
+      "laxar-uikit": "LaxarJS/laxar-uikit.git#^1.0.0-alpha.6",
       "moment": "^2.9.x"
    },
    "devDependencies": {

@@ -3,9 +3,9 @@ var require = {
    deps: [],
    packages: [
       {
-         name: 'laxar_uikit',
-         location: 'laxar_uikit',
-         main: 'laxar_uikit'
+         name: 'laxar-uikit',
+         location: 'laxar-uikit',
+         main: 'laxar-uikit'
       },
       {
          name: 'moment',
