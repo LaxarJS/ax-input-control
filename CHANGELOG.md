@@ -2,6 +2,9 @@
 
 ## Last Changes
 
+
+## v1.0.1
+
 - [#3](https://github.com/LaxarJS/ax-input-control/issues/3): cleared timeouts and intervals on destroy
 
 
