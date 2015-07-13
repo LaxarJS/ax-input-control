@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#4](https://github.com/LaxarJS/ax-input-control/issues/4): messages: fixed german date format valide-hint
+
 
 ## v1.0.1
 
