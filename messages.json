@@ -1,6 +1,6 @@
 {
    "de": {
-      "SYNTAX_TYPE_DATE": "Bitte geben Sie ein gültiges Datum im Format DD.MM.JJJJ an.",
+      "SYNTAX_TYPE_DATE": "Bitte geben Sie ein gültiges Datum im Format TT.MM.JJJJ an.",
       "SYNTAX_TYPE_TIME": "Bitte geben Sie eine gültige Zeit im Format SS:MM an.",
       "SYNTAX_TYPE_INTEGER": "Bitte geben Sie einen ganzzahligen Wert an.",
       "SYNTAX_TYPE_DECIMAL": "Bitte geben Sie einen Dezimalwert an.",
