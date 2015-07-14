@@ -126,3 +126,34 @@ This takes an object having the following entries:
 - *timeFallbackFormats*: an array of formats to try parsing the value when using `timeFormat` fails
 
 Formats for date and time are given in [Moment.js](http://momentjs.com/docs/#/displaying/format/) syntax.
+
+
+### Custom Validation Messages
+
+The `axInput` control comes with a default set of [validation messages](messages.json) for its builtin validators, available for german (`de`) and english (`en` and `en_GB`) localization.
+Although we may add some more localizations in the future (hey, this could be the chance for your first [contribution](CONTRIBUTING.md) ;-)) it may always be necessary to use custom validation messages in a widget.
+
+This can be achieved by using the `axInputValidationMessage` directive.
+Its value can be any valid *AngularJS* expression, that evaluates to either a map defining translations for any of the keys found in the provided [messages.json](messages.json) file, or a single string that should be used for any kind of validation error.
+
+Example: Using a simple constant within a template
+```html
+<input ng-model="value"
+       ax-input="decimal"
+       ax-input-validation-message="'Please insert a correct decimal number.'">
+```
+
+Example: Binding to the scope of e.g. a widget
+```html
+<input ng-model="value"
+       ax-input="decimal"
+       ax-input-validation-message="validationMessages">
+```
+
+```js
+$scope.value = 13;
+$scope.validationMessages = {
+   SYNTAX_TYPE_DECIMAL: 'Insert a valid decimal number!',
+   // ... more messages
+};
+```
