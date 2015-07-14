@@ -54,7 +54,7 @@ define( [
 
       ax.object.extend( this, {
 
-         initialize: function( type, formattingOptions ) {
+         initialize: function( type, formattingOptions, languageTagProvider ) {
             assert.state(
                KNOWN_TYPES.indexOf( type ) !== -1,
                'Type has to be one of \\[' + ( KNOWN_TYPES.join( ', ' ) ) + '] but got ' + type + '.'
@@ -63,6 +63,11 @@ define( [
             this.valueType = type;
             this.parse = createParser( type, formattingOptions );
             this.format = createFormatter( type, formattingOptions );
+
+            this.languageTagProvider = languageTagProvider;
+            this.messagesProvider = this.defaultMessagesProvider = function() {
+               return ax.i18n.localizeRelaxed( languageTagProvider(), messages );
+            };
          },
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,6 +104,33 @@ define( [
                }
             } );
             return validationMessages;
+         },
+
+         /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+         setCustomValidationMessageProvider: function( messagesProvider ) {
+            if( typeof messagesProvider === 'function' ) {
+               this.messagesProvider = messagesProvider;
+            }
+            else {
+               this.messagesProvider = this.defaultMessagesProvider;
+            }
+         },
+
+         /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+         message: function( key, optionalSubstitutions ) {
+            var messageOrMessages = this.messagesProvider();
+            var message = messageOrMessages[ key ] || messageOrMessages;
+            if( !message || ( typeof message === 'object' && !message.hasOwnProperty( key ) ) ) {
+               return ax.string.format(
+                  'No message found for language tag "[languageTag]" and key "[key]".', {
+                     key: key,
+                     languageTag: this.languageTagProvider()
+                  }
+               );
+            }
+            return optionalSubstitutions ? ax.string.format( message, optionalSubstitutions ) : message;
          }
 
       } );
@@ -153,10 +185,14 @@ define( [
             scope.$watch( 'i18n', updateFormatting, true );
             scope.$watch( attrs.axInputFormatting, updateFormatting, true );
 
+            function languageTagProvider() {
+               return ui.i18n.languageTagFromScope( scope );
+            }
+
             function updateFormatting( newValue, oldValue ) {
                if( newValue === oldValue ) { return; }
                formattingOptions = getFormattingOptions( scope, attrs );
-               axInputController.initialize( valueType, formattingOptions );
+               axInputController.initialize( valueType, formattingOptions, languageTagProvider );
                ngModelController.$viewValue = axInputController.format( ngModelController.$modelValue );
                runFormatters();
                ngModelController.$render();
@@ -170,7 +206,7 @@ define( [
                clearInterval( tooltipPositionInterval );
             } );
 
-            axInputController.initialize( valueType, formattingOptions );
+            axInputController.initialize( valueType, formattingOptions, languageTagProvider );
 
             initializeDisplayErrors();
 
@@ -291,7 +327,7 @@ define( [
                   validationMessage = '';
                }
                else {
-                  validationMessage = messages.de[ 'SYNTAX_TYPE_' + valueType.toUpperCase() ];
+                  validationMessage = axInputController.message( 'SYNTAX_TYPE_' + valueType.toUpperCase() );
                }
                return lastValidValue;
             }
@@ -588,6 +624,21 @@ define( [
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+   var validationMessageDirectiveName = 'axInputValidationMessage';
+   var validationMessageDirective = [ function() {
+      return {
+         restrict: 'A',
+         require: 'axInput',
+         link: function( scope, element, attrs, axInputController ) {
+            axInputController.setCustomValidationMessageProvider( function() {
+               return scope.$eval( attrs[ validationMessageDirectiveName ] );
+            } );
+         }
+      };
+   } ];
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
    function isText( element ) {
       var el = element[0];
       return el.nodeName.toLowerCase() === 'input' && el.type === 'text' || !el.type;
@@ -616,7 +667,8 @@ define( [
    var module = ng.module( directiveName + 'Control', [] )
       .config( configureNgModelOptions )
       .controller( controllerName, controller )
-      .directive( directiveName, directive );
+      .directive( directiveName, directive )
+      .directive( validationMessageDirectiveName, validationMessageDirective );
 
    return builtinValidators.addToModule( module );
 

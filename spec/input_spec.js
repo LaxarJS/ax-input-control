@@ -8,7 +8,7 @@ define( [
    '../ax-input-control',
    'angular-mocks',
    'jquery'
-], function( ax, inputModule, angularMocks, $ ) {
+], function( ax, inputModule, ngMocks, $ ) {
    'use strict';
 
    describe( 'An axInput control', function() {
@@ -17,8 +17,8 @@ define( [
       var $rootScope;
 
       beforeEach( function() {
-         angularMocks.module( inputModule.name );
-         angularMocks.inject( function( _$compile_, _$rootScope_ ) {
+         ngMocks.module( inputModule.name );
+         ngMocks.inject( function( _$compile_, _$rootScope_ ) {
             $compile = function( source ) {
                var compiled = _$compile_( source );
                return function( scope ) {
@@ -640,8 +640,8 @@ define( [
       };
       var controller;
 
-      beforeEach( angularMocks.module( inputModule.name ) );
-      beforeEach( angularMocks.inject( function( $controller ) {
+      beforeEach( ngMocks.module( inputModule.name ) );
+      beforeEach( ngMocks.inject( function( $controller ) {
          controller = $controller( 'AxInputController' );
       } ) );
 
@@ -789,6 +789,75 @@ define( [
             expect( result ).toEqual( [ 'There was an error.', 'There was an error.' ] );
          } );
 
+      } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      it( 'allows configuration of custom messages providers', function() {
+         controller.setCustomValidationMessageProvider( function() {
+            return {
+               ERROR_1: 'Error one',
+               ERROR_2: 'Error two with [subst].'
+            };
+         } );
+
+         expect( controller.message( 'ERROR_1' ) ).toEqual( 'Error one' );
+         expect( controller.message( 'ERROR_2', { subst: 'more info' } ) )
+            .toEqual( 'Error two with more info.' );
+      } );
+
+   } );
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   describe( 'An axInputValidationMessage directive', function() {
+
+      var scope;
+      var element;
+      var axInputController;
+
+      beforeEach( ngMocks.module( inputModule.name ) );
+      beforeEach( function() {
+         ngMocks.module( function( $provide ) {
+            $provide.decorator( '$controller', function( $delegate ) {
+               return function( controllerName ) {
+                  var controller = $delegate.apply( null, arguments );
+                  if( controllerName === 'AxInputController' ) {
+                     axInputController = controller();
+                     Object.keys( axInputController ).forEach( function( prop ) {
+                        if( typeof axInputController[ prop ] === 'function' ) {
+                           spyOn( axInputController, prop ).andCallThrough();
+                        }
+                     } );
+                     return ax.object.extend( function() {
+                        return axInputController;
+                     }, controller );
+                  }
+                  return controller;
+               };
+            } );
+         } );
+
+         ngMocks.inject( function( $compile, $rootScope ) {
+            scope = $rootScope.$new();
+            scope.value = 'Hi there';
+            scope.validationMessage = 'This is wrong!';
+            element = $compile( '<input ng-model="value" ax-input="string" ax-input-validation-message="validationMessage">' )( scope );
+         } );
+      } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      it( 'sets a message provider function on the axInputController', function() {
+         expect( axInputController.setCustomValidationMessageProvider )
+            .toHaveBeenCalledWith( jasmine.any( Function ) );
+      } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      it( 'returns the currently bound error message in its message provider function', function() {
+         var func = axInputController.setCustomValidationMessageProvider.calls[0].args[0];
+         expect( func() ).toEqual( 'This is wrong!' );
       } );
 
    } );

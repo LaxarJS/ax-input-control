@@ -3,11 +3,6 @@ var require = {
    deps: [],
    packages: [
       {
-         name: 'laxar-uikit',
-         location: 'laxar-uikit',
-         main: 'laxar-uikit'
-      },
-      {
          name: 'moment',
          location: 'moment',
          main: 'moment'
@@ -23,6 +18,7 @@ var require = {
       jjve: 'jjve/jjve',
       json: 'requirejs-plugins/src/json',
       laxar: 'laxar/dist/laxar',
+      'laxar-uikit': 'laxar-uikit/dist/laxar-uikit',
       'laxar/laxar_testing': 'laxar/dist/laxar_testing',
       requirejs: 'requirejs/require',
       text: 'requirejs-plugins/lib/text',
