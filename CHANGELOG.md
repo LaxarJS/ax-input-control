@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#7](https://github.com/LaxarJS/ax-input-control/issues/7): validation: fixed setting custom validation message
+
 
 ## v1.1.0
 

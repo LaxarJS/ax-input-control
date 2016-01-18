@@ -629,6 +629,7 @@ define( [
       return {
          restrict: 'A',
          require: 'axInput',
+         priority: 12, // ensure linking after axInput and validators
          link: function( scope, element, attrs, axInputController ) {
             axInputController.setCustomValidationMessageProvider( function() {
                return scope.$eval( attrs[ validationMessageDirectiveName ] );
