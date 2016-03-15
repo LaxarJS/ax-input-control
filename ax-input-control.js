@@ -206,6 +206,10 @@ define( [
                clearInterval( tooltipPositionInterval );
             } );
 
+            var tooltipHolder = attrs.axInputTooltipOnParent !== undefined ?
+               element.parent() :
+               element;
+
             axInputController.initialize( valueType, formattingOptions, languageTagProvider );
 
             initializeDisplayErrors();
@@ -272,8 +276,8 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             var hasFocus = false;
-            element.on( 'focusin', function() {
-
+            tooltipHolder.on( 'focusin', function( event ) {
+               if( hasFocus ) { return; }
                hasFocus = true;
                if( ngModelController.$invalid && mustDisplayErrors() ) {
                   showTooltip();
@@ -285,7 +289,7 @@ define( [
                   }
                }
 
-               element.one( 'focusout', function() {
+               tooltipHolder.one( 'focusout', function() {
                   hasFocus = false;
                   hideTooltip();
                   if( valueType === 'select' ) {
@@ -437,14 +441,14 @@ define( [
                if( !tooltipId ) {
                   tooltipId = createTooltip();
                }
-               element.tooltip( 'show' );
+               tooltipHolder.tooltip( 'show' );
             }
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             function hideTooltip() {
                if( tooltipId ) {
-                  element.tooltip( 'hide' );
+                  tooltipHolder.tooltip( 'hide' );
                }
             }
 
@@ -453,7 +457,7 @@ define( [
             function createTooltip() {
                var id = 'axInputErrorTooltip' + idCounter++;
 
-               element.tooltip( {
+               tooltipHolder.tooltip( {
                   animation: true,
                   trigger: 'manual',
                   placement: isSelect( element ) ? 'top' : function( tooltipEl, anchor ) {
@@ -495,7 +499,7 @@ define( [
                      else if( pending ) {
                         pending = false;
                         clearInterval( tooltipPositionInterval );
-                        element.tooltip( 'show' );
+                        tooltipHolder.tooltip( 'show' );
                      }
                      lastElementPosition = newPosition;
                      lastElementPositionString = newPositionString;
@@ -513,8 +517,8 @@ define( [
 
             function destroyTooltip() {
                if( tooltipId ) {
-                  element.tooltip( 'hide' );
-                  element.tooltip( 'destroy' );
+                  tooltipHolder.tooltip( 'hide' );
+                  tooltipHolder.tooltip( 'destroy' );
                }
             }
 
