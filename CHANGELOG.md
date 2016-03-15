@@ -2,6 +2,9 @@
 
 ## Last Changes
 
+
+## v1.2.0
+
 - [#8](https://github.com/LaxarJS/ax-input-control/issues/8): tooltip: allow to set on parent element
 - [#7](https://github.com/LaxarJS/ax-input-control/issues/7): validation: fixed setting custom validation message
 
