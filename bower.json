@@ -1,6 +1,6 @@
 {
    "name": "laxar-input-control",
-   "version": "1.3.0-pre",
+   "version": "2.0.0-pre",
    "description": "An AngularJS directive that adds powerful interactive validation to form elements, for LaxarJS widgets.",
    "authors": [],
    "license": "MIT",
