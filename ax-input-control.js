@@ -404,8 +404,9 @@ define( [
 
                function getLabel( element ) {
                   var label = element.parents( 'label' );
-                  if( element.id ) {
-                     label.add( 'label[for="' + element.id + '"]' );
+                  var id = element.attr( 'id' );
+                  if( id ) {
+                     label = label.add( 'label[for="' + id + '"]' );
                   }
                   return label;
                }
