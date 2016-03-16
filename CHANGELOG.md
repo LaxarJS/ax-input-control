@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#10](https://github.com/LaxarJS/ax-input-control/issues/10): validation: fixed error style with label using for-attribute
+
 
 ## v1.2.0
 
