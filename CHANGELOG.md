@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#11](https://github.com/LaxarJS/ax-input-control/issues/11): validation: removed weird focus-behavior, changed radio-group identification to follow HTML semantics
+    + **BREAKING CHANGE:** see ticket for details
 - [#10](https://github.com/LaxarJS/ax-input-control/issues/10): validation: fixed error style with label using for-attribute
 
 

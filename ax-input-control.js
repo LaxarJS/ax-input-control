@@ -526,9 +526,6 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             function toggleTooltip( value ) {
-               if( isRadio( element ) && radioGroup()[ 0 ] === element[ 0 ] ) {
-                  element.focus();
-               }
                if( ngModelController.$invalid && hasFocus && mustDisplayErrors() ) {
                   if( !tooltipVisible || previousValidationMessage !== validationMessage ) {
                      showTooltip();
@@ -562,12 +559,8 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             function radioGroup() {
-               var selector = [ 'ng\\:model', 'x-ng-model', 'ng-model', 'data-ng-model' ]
-                  .map( function( attribute ) {
-                     return 'input[type="radio"][' + attribute + '="' + attrs.ngModel + '"]';
-                  } )
-                  .join( ', ' );
-               return $( selector );
+               var form = element.parents( 'form' ).first();
+               return form.find( 'input[type="radio"][name="' + attrs.name + '"]' );
             }
          }
       };
