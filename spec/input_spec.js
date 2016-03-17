@@ -571,8 +571,8 @@ define( [
                   ////////////////////////////////////////////////////////////////////////////////////////////
 
                   it( 'sets the class "ax-error-pending" on the input field', function() {
-                     expect( $element.hasClass( 'ax-error-pending' ) ).toBe( true );
                      expect( $element.hasClass( 'ax-error' ) ).toBe( false );
+                     expect( $element.hasClass( 'ax-error-pending' ) ).toBe( true );
                   } );
 
                   ////////////////////////////////////////////////////////////////////////////////////////////

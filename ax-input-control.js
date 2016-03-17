@@ -40,6 +40,9 @@ define( [
 
    var KNOWN_TYPES = [ 'date', 'time', 'decimal', 'integer', 'string', 'select' ];
 
+   var ERROR_CLASS_REGEXP = new RegExp( '(^| )' + ERROR_CLASS + '( |$)', 'g' );
+   var ERROR_PENDING_CLASS_REGEXP = new RegExp( '(^| )' + ERROR_PENDING_CLASS + '( |$)', 'g' );
+
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function configValue( key, fallback ) {
@@ -162,7 +165,13 @@ define( [
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    var directiveName = 'axInput';
-   var directive = [ function() {
+   var directive = [ '$injector', function( $injector ) {
+
+      var $animate = $injector.has( '$animate' ) ? $injector.get( '$animate' ) : {
+         enabled: function() {
+            throw new Error( 'UNREACHABLE' );
+         }
+      };
 
       var idCounter = 0;
       var defaultDisplayErrorsImmediately = configValue( 'displayErrorsImmediately', true );
@@ -217,11 +226,13 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             scope.$on( EVENT_REFRESH, function() {
+               $animate.enabled( false );
                // force re-validation by running all parsers
                var value = ngModelController.$viewValue;
                ngModelController.$parsers.forEach( function( f ) {
                   value = f( value );
                } );
+               $animate.enabled( true );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -395,35 +406,64 @@ define( [
                }, 0 );
             }
 
-            //////////////////////////////////////////////////////////////////////////////////////////////////
-
             function toggleErrorClass( value ) {
                var displayErrors = mustDisplayErrors();
                var axErrorState = ngModelController.$invalid && displayErrors;
                var axErrorPendingState = ngModelController.$invalid && !displayErrors;
 
-               function getLabel( element ) {
-                  var label = element.parents( 'label' );
-                  var id = element.attr( 'id' );
-                  if( id ) {
-                     label = label.add( 'label[for="' + id + '"]' );
-                  }
-                  return label;
-               }
-
                if( isRadio( element ) ) {
                   radioGroup().each( function( i, button ) {
-                     getLabel( $( button ) ).toggleClass( ERROR_CLASS, axErrorState );
-                     getLabel( $( button ) ).toggleClass( ERROR_PENDING_CLASS, axErrorPendingState );
+                     updateErrorState( domLabel( button ) );
                   } );
                }
                else if( isCheckbox( element ) ) {
-                  getLabel( element ).toggleClass( ERROR_CLASS, axErrorState );
-                  getLabel( element ).toggleClass( ERROR_PENDING_CLASS, axErrorPendingState );
+                  updateErrorState( domLabel( element[0] ) );
                }
                else {
-                  element.toggleClass( ERROR_CLASS, axErrorState );
-                  element.toggleClass( ERROR_PENDING_CLASS, axErrorPendingState );
+                  updateErrorState( element[0] );
+               }
+
+
+               /** Must be efficient, otherwise validation of larger forms *will* be slow (measured). */
+               function domLabel( domElement ) {
+                  var id = domElement.id;
+                  if( id ) {
+                     var domLabel = document.querySelector( 'label[for="' + id + '"]' );
+                     if( domLabel ) { return domLabel; }
+                  }
+                  var domAncestor;
+                  do {
+                     domAncestor = domElement.parentNode;
+                  } while ( domAncestor && domAncestor.nodeName !== 'label' );
+                  return domAncestor;
+               }
+
+               /** Must be efficient, otherwise validation of larger forms *will* be slow (measured). */
+               function updateErrorState( domElement ) {
+                  if( !domElement ) { return; }
+                  var className = domElement.className;
+                  var hasErrorClass = ERROR_CLASS_REGEXP.test( className );
+                  var hasErrorPendingClass = ERROR_PENDING_CLASS_REGEXP.test( className );
+                  ERROR_CLASS_REGEXP.lastIndex = 0;
+                  ERROR_PENDING_CLASS_REGEXP.lastIndex = 0;
+                  if( axErrorState ) {
+                     if( !hasErrorClass ) {
+                        className += (' ' + ERROR_CLASS);
+                     }
+                  }
+                  else if( axErrorPendingState && !hasErrorPendingClass ) {
+                     className += ' ' + ERROR_PENDING_CLASS;
+                  }
+
+                  if( !axErrorState && hasErrorClass ) {
+                     className = className.replace( ERROR_CLASS_REGEXP, ' ' );
+                  }
+
+                  if( !axErrorPendingState && hasErrorPendingClass ) {
+                     className = className.replace( ERROR_PENDING_CLASS_REGEXP, ' ' );
+                  }
+
+                  domElement.className = className;
                }
 
                return value;
