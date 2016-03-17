@@ -413,10 +413,12 @@ define( [
 
                if( isRadio( element ) ) {
                   radioGroup().each( function( i, button ) {
+                     updateErrorState( button );
                      updateErrorState( domLabel( button ) );
                   } );
                }
                else if( isCheckbox( element ) ) {
+                  updateErrorState( element[0] );
                   updateErrorState( domLabel( element[0] ) );
                }
                else {

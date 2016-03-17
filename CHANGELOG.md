@@ -2,7 +2,9 @@
 
 ## Last Changes
 
-- [#12](https://github.com/LaxarJS/ax-input-control/issues/13): performance: improve style updates for validation
+
+- [#12](https://github.com/LaxarJS/ax-input-control/issues/12): fixed radio/checkbox CSS error classes
+- [#13](https://github.com/LaxarJS/ax-input-control/issues/13): performance: improve style updates for validation
 
 
 ## v2.0.0-alpha.0
