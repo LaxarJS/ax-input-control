@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#14](https://github.com/LaxarJS/ax-input-control/issues/14): improved tooltip handling
+
 
 ## v2.0.0-alpha.1
 

@@ -456,6 +456,7 @@ define( [
                $element.trigger( 'focusin' );
                $.fn.tooltip.reset();
                $element.trigger( 'blur' );
+               jasmine.Clock.tick( 100 );
                expect( $.fn.tooltip ).toHaveBeenCalledWith( 'hide' );
             } );
 
@@ -480,6 +481,7 @@ define( [
                ///////////////////////////////////////////////////////////////////////////////////////////////
 
                it( 'hides the tooltip', function() {
+                  jasmine.Clock.tick( 100 );
                   expect( $.fn.tooltip ).toHaveBeenCalledWith( 'hide' );
                } );
 
@@ -615,9 +617,9 @@ define( [
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-         it( 'configures the tooltip to open to the top (jira ATP-7931)', function() {
+         it( 'configures the tooltip to open to either left or right', function() {
             var options = $.fn.tooltip.calls[0].args[0];
-            expect( options.placement ).toEqual( 'top' );
+            expect( [ 'left', 'right' ].indexOf( options.placement() ) ).not.toBe( -1 );
          } );
 
       } );

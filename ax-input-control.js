@@ -23,7 +23,9 @@ define( [
    var ERROR_KEY_SEMANTIC = 'semantic';
 
    var EVENT_VALIDATE = 'axInput.validate';
-   // this currently is duplicated in builtin_validators.js. Thus when changing this here, remember to change it there ...
+
+   // This currently is duplicated in builtin_validators.js.
+   // Thus when changing this here, remember to change it there ...
    var EVENT_REFRESH = 'axInput._refresh';
 
    var DEFAULT_FORMATTING = {
@@ -165,7 +167,7 @@ define( [
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    var directiveName = 'axInput';
-   var directive = [ '$injector', function( $injector ) {
+   var directive = [ '$injector', '$window', function( $injector, $window ) {
 
       var $animate = $injector.has( '$animate' ) ? $injector.get( '$animate' ) : {
          enabled: function() {
@@ -183,7 +185,6 @@ define( [
          require: [ 'ngModel', 'axInput' ],
          link: function( scope, element, attrs, controllers ) {
             var removeGroupingAndKeepCursorPositionTimeout;
-            var tooltipPositionInterval;
             var validationMessage = '';
             var previousValidationMessage = '';
 
@@ -215,6 +216,9 @@ define( [
                clearInterval( tooltipPositionInterval );
             } );
 
+            var tooltipId;
+            var tooltipPositionInterval;
+            var tooltipHideInProgress = false;
             var tooltipHolder = attrs.axInputTooltipOnParent !== undefined ?
                element.parent() :
                element;
@@ -300,11 +304,11 @@ define( [
                   }
                }
 
-               tooltipHolder.one( 'focusout', function() {
+               tooltipHolder.one( 'focusout', function( e ) {
                   hasFocus = false;
                   hideTooltip();
                   if( valueType === 'select' ) {
-                     // Prevent reformatting of the value for select/radio because AngularJS takes care of them.
+                     // Prevent reformatting of the value for select/radio (AngularJS takes care of them).
                      return;
                   }
                   if( !ngModelController.$error[ ERROR_KEY_SYNTAX ] ) {
@@ -406,6 +410,8 @@ define( [
                }, 0 );
             }
 
+            //////////////////////////////////////////////////////////////////////////////////////////////////
+
             function toggleErrorClass( value ) {
                var displayErrors = mustDisplayErrors();
                var axErrorState = ngModelController.$invalid && displayErrors;
@@ -475,14 +481,13 @@ define( [
             // Tooltip handling
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
-            var tooltipId;
-            var tooltipVisible = false;
-
-            //////////////////////////////////////////////////////////////////////////////////////////////////
-
             function showTooltip() {
                if( !tooltipId ) {
                   tooltipId = createTooltip();
+               }
+               if( tooltipHideInProgress ) {
+                  tooltipHideInProgress = false;
+                  return;
                }
                tooltipHolder.tooltip( 'show' );
             }
@@ -491,7 +496,14 @@ define( [
 
             function hideTooltip() {
                if( tooltipId ) {
-                  tooltipHolder.tooltip( 'hide' );
+                  tooltipHideInProgress = true;
+                  // some custom controls (e.g. bootstrap-select) generate superflouus focusout events,
+                  // so we delay the hiding:
+                  setTimeout( function() {
+                     if( !tooltipHideInProgress ) { return; }
+                     tooltipHideInProgress = false;
+                     destroyTooltip();
+                  }, 25 );
                }
             }
 
@@ -503,34 +515,33 @@ define( [
                tooltipHolder.tooltip( {
                   animation: true,
                   trigger: 'manual',
-                  placement: isSelect( element ) ? 'top' : function( tooltipEl, anchor ) {
-                     var anchorOffset = $( anchor ).offset();
-                     var anchorHeight = $( anchor ).outerHeight( true );
-                     var documentHeight = $( document ).outerHeight( true );
-                     if( anchorOffset.top + anchorHeight + 150 > documentHeight ) {
-                        return 'auto';
-                     }
-
-                     return 'bottom';
-                  },
-                  template:
-                     '<div id="' + id + '" class="tooltip error">' +
-                     '<div class="tooltip-arrow"></div>' +
-                     '<div class="tooltip-inner"></div>' +
-                     '</div>',
+                  placement: tooltipPlacement(),
+                  template: tooltipTemplate(),
                   title: function() {
                      return validationMessage;
                   },
                   container: 'body'
                } )
-               .on( 'show.bs.tooltip hide.bs.tooltip', function( e ) {
-                  tooltipVisible = e.type === 'shown';
-               } )
-               .on( 'shown.bs.tooltip', function() {
+               .on( 'shown.bs.tooltip', onTooltipShown )
+               .on( 'hide.bs.tooltip', onTooltipHide );
+
+               function tooltipTemplate() {
+                  return '<div id="' + id + '" class="tooltip error">' +
+                  '<div class="tooltip-arrow"></div>' +
+                  '<div class="tooltip-inner"></div>' +
+                  '</div>';
+               }
+
+               function onTooltipHide() {
+                  clearInterval( tooltipPositionInterval );
+                  tooltipPositionInterval = null;
+               }
+
+               function onTooltipShown() {
                   var lastElementPosition = element.offset();
                   var lastElementPositionString = lastElementPosition.left + '_' + lastElementPosition.top;
-                  var pending = false;
 
+                  var pending = false;
                   clearInterval( tooltipPositionInterval );
                   tooltipPositionInterval = setInterval( function(  ) {
                      var newPosition = element.offset();
@@ -547,11 +558,22 @@ define( [
                      lastElementPosition = newPosition;
                      lastElementPositionString = newPositionString;
                   }, 200 );
-               } )
-               .on( 'hide.bs.tooltip', function() {
-                  clearInterval( tooltipPositionInterval );
-                  tooltipPositionInterval = null;
-               } );
+               }
+
+               function tooltipPlacement() {
+                  var anchor = tooltipHolder[0];
+                  return isSelect( element ) ?
+                     function() {
+                        var rect = anchor.getBoundingClientRect();
+                        var screenWidth = $window.innerWidth;
+                        return rect.left > Math.max( 0, screenWidth - rect.right ) ? 'left' : 'right';
+                     } :
+                     function() {
+                        var rect = anchor.getBoundingClientRect();
+                        var screenHeight = $window.innerHeight;
+                        return ( screenHeight - rect.bottom ) > 150 ? 'bottom' : 'auto';
+                     };
+               }
 
                return id;
             }
@@ -560,8 +582,12 @@ define( [
 
             function destroyTooltip() {
                if( tooltipId ) {
-                  tooltipHolder.tooltip( 'hide' );
-                  tooltipHolder.tooltip( 'destroy' );
+                  tooltipHolder
+                     .off( 'shown hidden' )
+                     .tooltip( 'hide' )
+                     .tooltip( 'destroy' );
+                  $( '#' + tooltipId ).remove();
+                  tooltipId = null;
                }
             }
 
@@ -583,19 +609,12 @@ define( [
 
             scope.$on( '$destroy', function() {
                try {
-                  element.off( 'focusin focusout shown hidden' );
                   destroyTooltip();
+                  tooltipHolder.off( 'focusin focusout' );
                }
                catch( e ) {
                   // Ignore. DOM node has been destroyed before the directive.
                }
-               $( '#' + tooltipId ).remove();
-
-               ngModelController.$formatters = [];
-               ngModelController.$parsers = [];
-               ngModelController = null;
-               axInputController = null;
-               element = null;
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
