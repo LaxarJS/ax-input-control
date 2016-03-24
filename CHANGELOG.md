@@ -2,6 +2,9 @@
 
 ## Last Changes
 
+
+## v2.0.0-alpha.3
+
 - [#15](https://github.com/LaxarJS/ax-input-control/issues/15): fixed undefined identifier
 
 
