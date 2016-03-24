@@ -595,7 +595,7 @@ define( [
 
             function toggleTooltip( value ) {
                if( ngModelController.$invalid && hasFocus && mustDisplayErrors() ) {
-                  if( !tooltipVisible || previousValidationMessage !== validationMessage ) {
+                  if( !tooltipId || previousValidationMessage !== validationMessage ) {
                      showTooltip();
                   }
                }
