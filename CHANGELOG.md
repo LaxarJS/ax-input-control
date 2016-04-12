@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#17](https://github.com/LaxarJS/ax-input-control/issues/17): improved tooltip responsiveness on scroll
+
 
 ## v2.0.0-alpha.3
 

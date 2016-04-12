@@ -430,10 +430,12 @@ define( [
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
-            it( 'shows a tooltip on focus', function() {
+            it( 'creates, then shows a tooltip on focus', function() {
                $.fn.tooltip.reset();
 
                $element.trigger( 'focusin' );
+               expect( $.fn.tooltip ).toHaveBeenCalledWith( jasmine.any( Object ) );
+               jasmine.Clock.tick( 0 );
                expect( $.fn.tooltip ).toHaveBeenCalledWith( 'show' );
             } );
 
@@ -535,6 +537,8 @@ define( [
                it( 'shows a tooltip on focus', function() {
                   $.fn.tooltip.reset();
                   $element.trigger( 'focusin' );
+                  expect( $.fn.tooltip ).toHaveBeenCalledWith( jasmine.any( Object ) );
+                  jasmine.Clock.tick( 0 );
                   expect( $.fn.tooltip ).toHaveBeenCalledWith( 'show' );
                } );
 

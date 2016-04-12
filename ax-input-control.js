@@ -213,11 +213,11 @@ define( [
 
             scope.$on( '$destroy', function() {
                clearTimeout( removeGroupingAndKeepCursorPositionTimeout );
-               clearInterval( tooltipPositionInterval );
+               clearTimeout( fixTooltipPositionTimeout );
             } );
 
             var tooltipId;
-            var tooltipPositionInterval;
+            var fixTooltipPositionTimeout;
             var tooltipHideInProgress = false;
             var tooltipHolder = attrs.axInputTooltipOnParent !== undefined ?
                element.parent() :
@@ -489,7 +489,11 @@ define( [
                   tooltipHideInProgress = false;
                   return;
                }
-               tooltipHolder.tooltip( 'show' );
+               // always wait for initial render so that no adjustment is needed afterwards
+               setTimeout( function() {
+                  if( !tooltipId || tooltipHideInProgress ) { return; }
+                  tooltipHolder.tooltip( 'show' );
+               }, 0 );
             }
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -510,54 +514,51 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             function createTooltip() {
-               var id = 'axInputErrorTooltip' + idCounter++;
-
+               var id = ++idCounter;
                tooltipHolder.tooltip( {
                   animation: true,
                   trigger: 'manual',
-                  placement: tooltipPlacement(),
+                  title: tooltipMessage(),
                   template: tooltipTemplate(),
-                  title: function() {
-                     return validationMessage;
-                  },
-                  container: 'body'
+                  placement: tooltipPlacement(),
+                  // 1. Stay in the same scroll container as the form element.
+                  // 2. Climb up to get on top of nearby form controls (z-index-wise).
+                  container: tooltipHolder.parent().parent()
                } )
                .on( 'shown.bs.tooltip', onTooltipShown )
                .on( 'hide.bs.tooltip', onTooltipHide );
+               return id;
+
+               ///////////////////////////////////////////////////////////////////////////////////////////////
+
+               function tooltipMessage() {
+                  return validationMessage;
+               }
 
                function tooltipTemplate() {
-                  return '<div id="' + id + '" class="tooltip error">' +
+                  return '<div data-ax-input-tooltip-id="' + id + '" class="tooltip error">' +
                   '<div class="tooltip-arrow"></div>' +
                   '<div class="tooltip-inner"></div>' +
                   '</div>';
                }
 
-               function onTooltipHide() {
-                  clearInterval( tooltipPositionInterval );
-                  tooltipPositionInterval = null;
+               function onTooltipShown() {
+                  if( fixTooltipPositionTimeout !== null ) { return; }
+                  var lastPosition = pos();
+                  fixTooltipPositionTimeout = setTimeout( function() {
+                     if( lastPosition === pos() ) { return; }
+                     tooltipHolder.tooltip( 'show' );
+                  }, 200 );
+
+                  function pos() {
+                     var position = element.offset();
+                     return position.left + '_' + position.top;
+                  }
                }
 
-               function onTooltipShown() {
-                  var lastElementPosition = element.offset();
-                  var lastElementPositionString = lastElementPosition.left + '_' + lastElementPosition.top;
-
-                  var pending = false;
-                  clearInterval( tooltipPositionInterval );
-                  tooltipPositionInterval = setInterval( function(  ) {
-                     var newPosition = element.offset();
-                     var newPositionString = newPosition.left + '_' + newPosition.top;
-
-                     if( lastElementPositionString !== newPositionString ) {
-                        pending = true;
-                     }
-                     else if( pending ) {
-                        pending = false;
-                        clearInterval( tooltipPositionInterval );
-                        tooltipHolder.tooltip( 'show' );
-                     }
-                     lastElementPosition = newPosition;
-                     lastElementPositionString = newPositionString;
-                  }, 200 );
+               function onTooltipHide() {
+                  clearTimeout( fixTooltipPositionTimeout );
+                  fixTooltipPositionTimeout = null;
                }
 
                function tooltipPlacement() {
@@ -571,11 +572,10 @@ define( [
                      function() {
                         var rect = anchor.getBoundingClientRect();
                         var screenHeight = $window.innerHeight;
-                        return ( screenHeight - rect.bottom ) > 150 ? 'bottom' : 'auto';
+                        return ( screenHeight - rect.bottom ) > 150 ? 'bottom' : 'top';
                      };
                }
 
-               return id;
             }
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -586,7 +586,8 @@ define( [
                      .off( 'shown hidden' )
                      .tooltip( 'hide' )
                      .tooltip( 'destroy' );
-                  $( '#' + tooltipId ).remove();
+                  clearTimeout( fixTooltipPositionTimeout );
+                  $( '[data-ax-input-tooltip-id=' + tooltipId + ']' ).remove();
                   tooltipId = null;
                }
             }
