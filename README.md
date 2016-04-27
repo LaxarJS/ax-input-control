@@ -105,7 +105,7 @@ Basic semantic validation directives that are already available are:
 - `ax-input-display-errors-immediately="$immediately"`: If `$immediately` evaluates to `true`, validation errors are presented to the user immediately by CSS styling and tooltip.
   Otherwise, errors are only shown when the field has been changed (ngModelController.$dirty) or when the event `axInput.validate` has been received.
   The default is `true` but will be changed to `false` in future major releases.
-  It can be changed using the configuration 'controls.ax-input-control.displayErrorsImmediately'.
+  It can be changed using the configuration 'lib.laxar-uikit.controls.input.displayErrorsImmediately'.
 
 Writing an own semantic validator is as easy as writing a directive requiring the axInputController and calling `addSemanticValidator` with the validator function as first argument and an error message generator function as second argument.
 A look at the [included semantic validators](lib/builtin_validators.js) should be sufficient to know how this works.
