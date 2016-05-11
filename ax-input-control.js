@@ -423,14 +423,10 @@ define( [
                      updateErrorState( domLabel( button ) );
                   } );
                }
-               else if( isCheckbox( element ) ) {
+               else {
                   updateErrorState( element[0] );
                   updateErrorState( domLabel( element[0] ) );
                }
-               else {
-                  updateErrorState( element[0] );
-               }
-
 
                /** Must be efficient, otherwise validation of larger forms *will* be slow (measured). */
                function domLabel( domElement ) {
@@ -439,9 +435,9 @@ define( [
                      var domLabel = document.querySelector( 'label[for="' + id + '"]' );
                      if( domLabel ) { return domLabel; }
                   }
-                  var domAncestor;
+                  var domAncestor = domElement;
                   do {
-                     domAncestor = domElement.parentNode;
+                     domAncestor = domAncestor.parentNode;
                   } while ( domAncestor && domAncestor.nodeName !== 'label' );
                   return domAncestor;
                }

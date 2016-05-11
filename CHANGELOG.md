@@ -3,6 +3,9 @@
 ## Last Changes
 
 
+- [#22](https://github.com/LaxarJS/ax-input-control/issues/22): transfer `ax-error` class to label, for text inputs and select boxes as well
+
+
 ## v2.0.0-alpha.4
 
 - [#17](https://github.com/LaxarJS/ax-input-control/issues/17): improved tooltip responsiveness on scroll

@@ -5,7 +5,7 @@
 This directive can be used in combination with `ngModel` to enrich a simple input field with type information in order to perform automatic syntactical validation, parsing and formatting.
 Additionally it is possible to add semantic validators based on simple AngularJS directives using a simple interface of a controller defined within the input directive.
 Whenever there is an error (be it semantic or syntactic) a tooltip is shown as long as the input field is focused.
-Additionally the input field receives the class `ax-error`.
+Additionally the input field and its label (associated through nesting or by `for`+`id` attribute) receives the class `ax-error`.
 
 
 ## Installation
