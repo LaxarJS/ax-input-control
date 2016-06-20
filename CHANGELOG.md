@@ -2,6 +2,9 @@
 
 ## Last Changes
 
+
+## v1.2.2
+
 - [#16](https://github.com/LaxarJS/ax-input-control/issues/16): ignore `title` attribute when showing validation message
 
 
