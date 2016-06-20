@@ -40,6 +40,9 @@ define( [
 
    var KNOWN_TYPES = [ 'date', 'time', 'decimal', 'integer', 'string', 'select' ];
 
+   // because the title attribute confuses bootstrap-tooltip, temporarily store it under this attribute
+   var TOOLTIP_SOURCE_TITLE = 'ax-input-source-title';
+
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function configValue( key, fallback ) {
@@ -442,6 +445,11 @@ define( [
                if( !tooltipId ) {
                   tooltipId = createTooltip();
                }
+               var title = tooltipHolder.attr( 'title' );
+               if( title != null ) {
+                  tooltipHolder.attr( TOOLTIP_SOURCE_TITLE, title );
+                  tooltipHolder.attr( 'title', null );
+               }
                tooltipHolder.tooltip( 'show' );
             }
 
@@ -449,6 +457,11 @@ define( [
 
             function hideTooltip() {
                if( tooltipId ) {
+                  var title = tooltipHolder.attr( TOOLTIP_SOURCE_TITLE );
+                  if( title != null ) {
+                     tooltipHolder.attr( 'title', title );
+                     tooltipHolder.attr( TOOLTIP_SOURCE_TITLE, null );
+                  }
                   tooltipHolder.tooltip( 'hide' );
                }
             }
@@ -457,7 +470,6 @@ define( [
 
             function createTooltip() {
                var id = 'axInputErrorTooltip' + idCounter++;
-
                tooltipHolder.tooltip( {
                   animation: true,
                   trigger: 'manual',
