@@ -45,6 +45,9 @@ define( [
    var ERROR_CLASS_REGEXP = new RegExp( '(^| )' + ERROR_CLASS + '( |$)', 'g' );
    var ERROR_PENDING_CLASS_REGEXP = new RegExp( '(^| )' + ERROR_PENDING_CLASS + '( |$)', 'g' );
 
+   // because the title attribute confuses bootstrap-tooltip, temporarily store it under this attribute
+   var TOOLTIP_SOURCE_TITLE = 'ax-input-source-title';
+
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function configValue( key, fallback ) {
@@ -511,6 +514,11 @@ define( [
 
             function createTooltip() {
                var id = ++idCounter;
+               var title = tooltipHolder.attr( 'title' );
+               if( title != null ) {
+                  tooltipHolder.attr( TOOLTIP_SOURCE_TITLE, title );
+                  tooltipHolder.attr( 'title', null );
+               }
                tooltipHolder.tooltip( {
                   animation: true,
                   trigger: 'manual',
@@ -578,6 +586,11 @@ define( [
 
             function destroyTooltip() {
                if( tooltipId ) {
+                  var title = tooltipHolder.attr( TOOLTIP_SOURCE_TITLE );
+                  if( title != null ) {
+                     tooltipHolder.attr( 'title', title );
+                     tooltipHolder.attr( TOOLTIP_SOURCE_TITLE, null );
+                  }
                   tooltipHolder
                      .off( 'shown hidden' )
                      .tooltip( 'hide' )

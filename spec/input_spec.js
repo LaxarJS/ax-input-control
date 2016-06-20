@@ -396,6 +396,7 @@ define( [
             scope = $rootScope.$new();
 
             $element = $compile( '<input ' +
+               'title="ignore me"' +
                'ng-model="someValue" ' +
                'ax-input="integer" ' +
                'ax-input-display-errors-immediately="showImmediately" ' +
@@ -441,6 +442,17 @@ define( [
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
+            it( 'masks any title attribute so it does not change the validation message', function() {
+               $.fn.tooltip.reset();
+
+               $element.trigger( 'focusin' );
+               expect( $.fn.tooltip ).toHaveBeenCalledWith( jasmine.any( Object ) );
+               jasmine.Clock.tick( 0 );
+               expect( $element.attr( 'title' ) ).toBeUndefined();
+            } );
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////
+
             it( 'sets the class "ax-error" on the input field', function() {
                expect( $element.hasClass( 'ax-error-pending' ) ).toBe( false );
                expect( $element.hasClass( 'ax-error' ) ).toBe( true );
@@ -460,6 +472,16 @@ define( [
                $element.trigger( 'blur' );
                jasmine.Clock.tick( 100 );
                expect( $.fn.tooltip ).toHaveBeenCalledWith( 'hide' );
+            } );
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////
+
+            it( 'restores any title attribute on blur', function() {
+               $element.trigger( 'focusin' );
+               $.fn.tooltip.reset();
+               $element.trigger( 'blur' );
+               jasmine.Clock.tick( 200 );
+               expect( $element.attr( 'title' ) ).toEqual( 'ignore me' );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
