@@ -2,6 +2,9 @@
 
 ## Last Changes
 
+
+## v2.0.0-alpha.7
+
 - [#18](https://github.com/LaxarJS/ax-input-control/issues/18): fixed updates to tooltip message
 
 
