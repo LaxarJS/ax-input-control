@@ -338,8 +338,6 @@ define( [
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
-            // Using named functions for formatters and parsers here for three reasons:
-            // better readability, easier testing and better debugging.
             function valueParser( value ) {
                var result = axInputController.parse( value );
                ngModelController.$setValidity( ERROR_KEY_SYNTAX, result.ok );
@@ -480,7 +478,16 @@ define( [
             // Tooltip handling
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
+            var showingTimeout;
             function showTooltip() {
+               if( tooltipId && validationMessage && previousValidationMessage
+                   && validationMessage !== previousValidationMessage ) {
+                  // must destroy tooltip to reflect updated text
+                  destroyTooltip();
+                  setTimeout( showTooltip, 0 );
+                  return;
+               }
+
                if( !tooltipId ) {
                   tooltipId = createTooltip();
                }
@@ -489,7 +496,8 @@ define( [
                   return;
                }
                // always wait for initial render so that no adjustment is needed afterwards
-               setTimeout( function() {
+               clearTimeout( showingTimeout );
+               showingTimeout = setTimeout( function() {
                   if( !tooltipId || tooltipHideInProgress ) { return; }
                   tooltipHolder.tooltip( 'show' );
                }, 0 );
@@ -504,7 +512,6 @@ define( [
                   // so we delay the hiding:
                   setTimeout( function() {
                      if( !tooltipHideInProgress ) { return; }
-                     tooltipHideInProgress = false;
                      destroyTooltip();
                   }, 25 );
                }
@@ -585,6 +592,7 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             function destroyTooltip() {
+               tooltipHideInProgress = false;
                if( tooltipId ) {
                   var title = tooltipHolder.attr( TOOLTIP_SOURCE_TITLE );
                   if( title != null ) {
