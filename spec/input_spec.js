@@ -78,17 +78,25 @@ define( [
 
          function formatterByName( name ) {
             return ngModelController.$formatters.filter( function( formatter ) {
-               return formatter.name === name;
-            } )[0];
-         }
+               return functionName( formatter ) === name;
+            } )[ 0 ];
 
+         }
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          function parserByName( name ) {
             return ngModelController.$parsers.filter( function( formatter ) {
-               return formatter.name === name;
+               return functionName( formatter ) === name;
             } )[0];
+         }
+
+         /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+         // replacement for non-standard Function.protoype.name, "good enough" for these tests
+         function functionName( f ) {
+            var match = f.toString().match( /^function\s*([^\s(]+)/);
+            return match ? match[ 1 ] : '';
          }
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -338,12 +346,6 @@ define( [
                expect( $element.hasClass( 'ax-error' ) ).toBe( true );
             } );
 
-            // event does not work in MSIE8
-            // xit( 'updates its validation state on input', function() {
-            //    $element[0].value = '50';
-            //    $element.trigger( 'input' );
-            //    expect( $element.hasClass( 'ax-error' ) ).toBe( true );
-            // } );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////

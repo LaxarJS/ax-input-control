@@ -160,8 +160,7 @@ define( [
 
    function enter( $input, value ) {
       $input.val( value );
-      var event = document.createElement( 'input' ).oninput === null ? 'input' : 'change';
-      $input.trigger( event );
+      $( $input ).trigger( 'change' );
    }
 
 } );

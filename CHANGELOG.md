@@ -2,6 +2,7 @@
 
 ## Last Changes
 
+- [#25](https://github.com/LaxarJS/ax-input-control/issues/25): fixed spec-tests in MSIE
 - [#24](https://github.com/LaxarJS/ax-input-control/issues/24): renamed configuration keys to no longer include LaxarJS uikit
     + **BREAKING CHANGE:** see ticket for details
 - [#21](https://github.com/LaxarJS/ax-input-control/issues/21): tooltip placement can now be overridden per control
