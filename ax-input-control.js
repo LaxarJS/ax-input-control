@@ -495,8 +495,8 @@ define( [
 
             var showingTimeout;
             function showTooltip() {
-               if( tooltipId && validationMessage && previousValidationMessage
-                   && validationMessage !== previousValidationMessage ) {
+               if( tooltipId && validationMessage && previousValidationMessage &&
+                   validationMessage !== previousValidationMessage ) {
                   // must destroy tooltip to reflect updated text
                   destroyTooltip();
                   setTimeout( showTooltip, 0 );
