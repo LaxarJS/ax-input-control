@@ -101,6 +101,7 @@ Basic semantic validation directives that are already available are:
 - `ax-input-range="$minimum, $maximum"` (all except string): requires the value to be greater or equal to `$minimum` AND below or equal to `$maximum`
 - `ax-input-maximum-length="$maximumLength"` (string only): requires the string's length to be below or equal to `$maximumLength`
 - `ax-input-minimum-length="$minimumLength"` (string only): requires the string's length to be greater than or equal to `$minimumLength`
+- `ax-input-tooltip-placement` (all types): if set, this string *(left/right/bottom/top)* is forwarded to the bootstrap tooltip component to determine tooltip placement on screen. Otherwise, the position is determined automatically depending on the type of form element and its position on screen (left/right for select boxes, top/bottom for other controls).
 - `ax-input-tooltip-on-parent`: if set, the tooltip is attached to the parent of the form control.
 - `ax-input-display-errors-immediately="$immediately"`: If `$immediately` evaluates to `true`, validation errors are presented to the user immediately by CSS styling and tooltip.
   Otherwise, errors are only shown when the field has been changed (`ngModelController.$dirty`) or after the event `axInput.validate` has been received.

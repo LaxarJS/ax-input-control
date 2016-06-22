@@ -588,6 +588,13 @@ define( [
                }
 
                function tooltipPlacement() {
+                  var fixedPlacement = attrs.axInputTooltipPlacement;
+                  if( fixedPlacement ) {
+                     return function() {
+                        return fixedPlacement;
+                     };
+                  }
+
                   var anchor = tooltipHolder[0];
                   return isSelect( element ) ?
                      function() {

@@ -239,6 +239,71 @@ define( [
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+      describe( 'when configured with user-defined placement', function() {
+
+         var $element;
+         var scope;
+         var html = '<input data-ax-input="integer" data-ng-model="someValue" ' +
+                    'data-ax-input-tooltip-placement="%PLACEMENT%" ' +
+                    'data-ax-input-display-errors-immediately="true" ax-input-minimum-value="100"/>';
+
+         beforeEach( function() {
+            scope = $rootScope.$new();
+            scope.someValue = 50;
+         } );
+
+         /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+         afterEach( function() {
+            $element.remove();
+         } );
+
+         //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+         describe( 'configured on the left, when an error tooltip is shown', function() {
+
+            beforeEach( function() {
+               scope.$apply( function() {
+                  $element = $compile( html.replace( /%PLACEMENT%/, 'left' ) )( scope );
+                  $element.appendTo( 'body' );
+               } );
+               $element.trigger( 'focusin' );
+            } );
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////
+
+            it( 'places the tooltip on the left', function() {
+               var options = $.fn.tooltip.calls[0].args[0];
+               expect( options.placement() ).toEqual( 'left' );
+            } );
+
+         } );
+
+         //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+         describe( 'configured on the top, when an error tooltip is shown', function() {
+
+            beforeEach( function() {
+               scope.$apply( function() {
+                  $element = $compile( html.replace( /%PLACEMENT%/, 'top' ) )( scope );
+                  $element.appendTo( 'body' );
+               } );
+               $element.trigger( 'focusin' );
+            } );
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////
+
+            it( 'places the tooltip on the left', function() {
+               var options = $.fn.tooltip.calls[0].args[0];
+               expect( options.placement() ).toEqual( 'top' );
+            } );
+
+         } );
+
+      } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
       describe( 'when configured with ngModelOptions', function() {
 
          var $element;
@@ -674,6 +739,12 @@ define( [
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+         afterEach( function() {
+            $element.remove();
+         } );
+
+         /////////////////////////////////////////////////////////////////////////////////////////////////////
+
          it( 'configures the tooltip to open to either left or right', function() {
             var options = $.fn.tooltip.calls[0].args[0];
             expect( [ 'left', 'right' ].indexOf( options.placement() ) ).not.toBe( -1 );
@@ -867,7 +938,7 @@ define( [
 
    } );
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    describe( 'An axInputValidationMessage directive', function() {
 

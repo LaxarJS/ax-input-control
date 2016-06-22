@@ -2,6 +2,10 @@
 
 ## Last Changes
 
+- [#21](https://github.com/LaxarJS/ax-input-control/issues/21): tooltip placement can now be overridden per control
+    + NEW FEATURE: see ticket for details
+
+
 ## v2.0.0-alpha.8
 
 - [#23](https://github.com/LaxarJS/ax-input-control/issues/23): users can now `$broadcast` the event `axInput.setPristine` to reset the validation state
