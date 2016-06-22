@@ -579,14 +579,13 @@ define( [
 
                ///////////////////////////////////////////////////////////////////////////////////////////////
 
-               describe( 'and then the form is reset ', function() {
+               describe( 'and then the form is reset using $setPristine', function() {
 
                   beforeEach( function() {
                      scope.$apply( function() {
                         $element.controller( 'ngModel' ).$setPristine();
                      } );
                   } );
-
 
                   ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -611,6 +610,38 @@ define( [
 
                } );
 
+               ///////////////////////////////////////////////////////////////////////////////////////////////
+
+               describe( 'and then the control is reset using the axInput.setPristine event', function() {
+
+                  beforeEach( function() {
+                     scope.$apply( function() {
+                        scope.$broadcast( 'axInput.setPristine' );
+                     } );
+                  } );
+
+                  ////////////////////////////////////////////////////////////////////////////////////////////
+
+                  it( 'does not show a tooltip on focus', function() {
+                     $.fn.tooltip.reset();
+                     $element.focus();
+                     expect( $.fn.tooltip ).not.toHaveBeenCalledWith( 'show' );
+                  } );
+
+                  ////////////////////////////////////////////////////////////////////////////////////////////
+
+                  it( 'sets the class "ax-error-pending" on the input field', function() {
+                     expect( $element.hasClass( 'ax-error' ) ).toBe( false );
+                     expect( $element.hasClass( 'ax-error-pending' ) ).toBe( true );
+                  } );
+
+                  ////////////////////////////////////////////////////////////////////////////////////////////
+
+                  it( 'sets the validation-pending flag', function() {
+                     expect( $element.controller( 'axInput' ).validationPending ).toBe( true );
+                  } );
+
+               } );
             } );
 
          } );

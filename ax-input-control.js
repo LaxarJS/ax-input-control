@@ -22,7 +22,10 @@ define( [
    var ERROR_KEY_SYNTAX = 'syntax';
    var ERROR_KEY_SEMANTIC = 'semantic';
 
+   // When received, perform validation on the control and enable display of errors (if currently off).
    var EVENT_VALIDATE = 'axInput.validate';
+   // When received, reset validation state of the control (like calling ngModelController.$setPristine).
+   var EVENT_RESET = 'axInput.setPristine';
 
    // This currently is duplicated in builtin_validators.js.
    // Thus when changing this here, remember to change it there ...
@@ -244,6 +247,16 @@ define( [
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
+            // Set the `validationPending` flag:
+            //  - `true` indicates that the validation state needs to shown to the user as soon as the next
+            //    `axInput.validate` event is received (or when the user modifies the control).
+            //  - `false` indicates that the validation state is already being presented to the user.
+            function setValidationPending( newValue ) {
+               axInputController.validationPending = newValue;
+            }
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////
+
             function initializeDisplayErrors() {
                var displayErrorsImmediately;
                var displayErrorsImmediatelyBinding = attrs.axInputDisplayErrorsImmediately;
@@ -252,28 +265,30 @@ define( [
                   scope.$watch( displayErrorsImmediatelyBinding, function( newValue, oldValue ) {
                      if( newValue === oldValue ) { return; }
                      displayErrorsImmediately = newValue;
-                     axInputController.validationPending = !newValue;
+                     setValidationPending( !displayErrorsImmediately );
                      runFormatters();
                   } );
                }
                else {
                   displayErrorsImmediately = defaultDisplayErrorsImmediately;
                }
-               axInputController.validationPending = !displayErrorsImmediately;
+               setValidationPending( !displayErrorsImmediately );
 
                scope.$on( EVENT_VALIDATE, function() {
                   if( !axInputController.validationPending ) { return; }
-                  axInputController.validationPending = false;
+                  setValidationPending( false );
                   runFormatters();
                } );
 
                // Override $setPristine to make sure tooltip and css classes are reset when form is reset
                var ngSetPristine = ngModelController.$setPristine.bind( ngModelController );
-               ngModelController.$setPristine = function() {
+               function setPristine() {
                   ngSetPristine();
-                  axInputController.validationPending = !displayErrorsImmediately;
+                  setValidationPending( !displayErrorsImmediately );
                   runFormatters();
-               };
+               }
+               ngModelController.$setPristine = setPristine;
+               scope.$on( EVENT_RESET, setPristine );
             }
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
