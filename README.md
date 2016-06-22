@@ -106,7 +106,7 @@ Basic semantic validation directives that are already available are:
 - `ax-input-display-errors-immediately="$immediately"`: If `$immediately` evaluates to `true`, validation errors are presented to the user immediately by CSS styling and tooltip.
   Otherwise, errors are only shown when the field has been changed (`ngModelController.$dirty`) or after the event `axInput.validate` has been received.
   The default is `true` but may be changed to `false` in future major releases.
-  It can be changed using the configuration `lib.laxar-uikit.controls.input.displayErrorsImmediately`.
+  It can be changed using the configuration `controls.laxar-input-control.displayErrorsImmediately`.
 
   The complementary event `axInput.setPristine` may be broadcast to reset the (visual) validation state.
   It has the same effect as calling `$setPristine()` on the AngularJS form controller or on the model controller associated with an `axInput` directive.
