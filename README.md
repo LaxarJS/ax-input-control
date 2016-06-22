@@ -103,11 +103,14 @@ Basic semantic validation directives that are already available are:
 - `ax-input-minimum-length="$minimumLength"` (string only): requires the string's length to be greater than or equal to `$minimumLength`
 - `ax-input-tooltip-on-parent`: if set, the tooltip is attached to the parent of the form control.
 - `ax-input-display-errors-immediately="$immediately"`: If `$immediately` evaluates to `true`, validation errors are presented to the user immediately by CSS styling and tooltip.
-  Otherwise, errors are only shown when the field has been changed (ngModelController.$dirty) or when the event `axInput.validate` has been received.
-  The default is `true` but will be changed to `false` in future major releases.
-  It can be changed using the configuration 'lib.laxar-uikit.controls.input.displayErrorsImmediately'.
+  Otherwise, errors are only shown when the field has been changed (`ngModelController.$dirty`) or after the event `axInput.validate` has been received.
+  The default is `true` but may be changed to `false` in future major releases.
+  It can be changed using the configuration `lib.laxar-uikit.controls.input.displayErrorsImmediately`.
 
-Writing an own semantic validator is as easy as writing a directive requiring the axInputController and calling `addSemanticValidator` with the validator function as first argument and an error message generator function as second argument.
+  The complementary event `axInput.setPristine` may be broadcast to reset the (visual) validation state.
+  It has the same effect as calling `$setPristine()` on the AngularJS form controller or on the model controller associated with an `axInput` directive.
+
+Writing a custom semantic validator is as easy as writing a directive requiring the axInputController and calling `addSemanticValidator` with the validator function as first argument and an error message generator function as second argument.
 A look at the [included semantic validators](lib/builtin_validators.js) should be sufficient to know how this works.
 
 Formatting of the displayed value can be controlled using the `ax-input-formatting` attribute.
