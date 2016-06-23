@@ -2,6 +2,9 @@
 
 ## Last Changes
 
+
+## v2.0.0-beta.0
+
 - [#25](https://github.com/LaxarJS/ax-input-control/issues/25): fixed spec-tests in MSIE
 - [#24](https://github.com/LaxarJS/ax-input-control/issues/24): renamed configuration keys to no longer include LaxarJS uikit
     + **BREAKING CHANGE:** see ticket for details
