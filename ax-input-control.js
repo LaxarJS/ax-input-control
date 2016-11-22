@@ -63,88 +63,84 @@ define( [
    var controller = [ function() {
       var validators = [];
 
-      ax.object.extend( this, {
+      this.initialize = function( type, formattingOptions, languageTagProvider ) {
+         assert.state(
+            KNOWN_TYPES.indexOf( type ) !== -1,
+            'Type has to be one of \\[' + ( KNOWN_TYPES.join( ', ' ) ) + '] but got ' + type + '.'
+         );
 
-         initialize: function( type, formattingOptions, languageTagProvider ) {
-            assert.state(
-               KNOWN_TYPES.indexOf( type ) !== -1,
-               'Type has to be one of \\[' + ( KNOWN_TYPES.join( ', ' ) ) + '] but got ' + type + '.'
-            );
+         this.valueType = type;
+         this.parse = createParser( type, formattingOptions );
+         this.format = createFormatter( type, formattingOptions );
 
-            this.valueType = type;
-            this.parse = createParser( type, formattingOptions );
-            this.format = createFormatter( type, formattingOptions );
+         this.languageTagProvider = languageTagProvider;
+         this.messagesProvider = this.defaultMessagesProvider = function() {
+            return ax.i18n.localizeRelaxed( languageTagProvider(), messages );
+         };
+      };
 
-            this.languageTagProvider = languageTagProvider;
-            this.messagesProvider = this.defaultMessagesProvider = function() {
-               return ax.i18n.localizeRelaxed( languageTagProvider(), messages );
-            };
-         },
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+      this.valueType = null;
 
-         valueType: null,
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+      this.parse = $.noop;
 
-         parse: $.noop,
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+      this.format = $.noop;
 
-         format: $.noop,
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+      this.addSemanticValidator = function( validationFunction, messageFunction ) {
+         assert( validationFunction ).hasType( Function ).isNotNull();
+         assert( messageFunction ).hasType( Function ).isNotNull();
 
-         addSemanticValidator: function( validationFunction, messageFunction ) {
-            assert( validationFunction ).hasType( Function ).isNotNull();
-            assert( messageFunction ).hasType( Function ).isNotNull();
+         validators.push( {
+            validate: validationFunction,
+            createMessage: messageFunction
+         } );
+      };
 
-            validators.push( {
-               validate: validationFunction,
-               createMessage: messageFunction
-            } );
-         },
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-         performSemanticValidations: function( value ) {
-            var validationMessages = [];
-            validators.forEach( function( entry ) {
-               if( !entry.validate( value ) ) {
-                  validationMessages.push( entry.createMessage( value ) );
-               }
-            } );
-            return validationMessages;
-         },
-
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-         setCustomValidationMessageProvider: function( messagesProvider ) {
-            if( typeof messagesProvider === 'function' ) {
-               this.messagesProvider = messagesProvider;
+      this.performSemanticValidations = function( value ) {
+         var validationMessages = [];
+         validators.forEach( function( entry ) {
+            if( !entry.validate( value ) ) {
+               validationMessages.push( entry.createMessage( value ) );
             }
-            else {
-               this.messagesProvider = this.defaultMessagesProvider;
-            }
-         },
+         } );
+         return validationMessages;
+      };
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-         message: function( key, optionalSubstitutions ) {
-            var messageOrMessages = this.messagesProvider();
-            var message = messageOrMessages[ key ] || messageOrMessages;
-            if( !message || ( typeof message === 'object' && !message.hasOwnProperty( key ) ) ) {
-               return ax.string.format(
-                  'No message found for language tag "[languageTag]" and key "[key]".', {
-                     key: key,
-                     languageTag: this.languageTagProvider()
-                  }
-               );
-            }
-            return optionalSubstitutions ? ax.string.format( message, optionalSubstitutions ) : message;
+      this.setCustomValidationMessageProvider = function( messagesProvider ) {
+         if( typeof messagesProvider === 'function' ) {
+            this.messagesProvider = messagesProvider;
          }
+         else {
+            this.messagesProvider = this.defaultMessagesProvider;
+         }
+      };
 
-      } );
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      this.message = function( key, optionalSubstitutions ) {
+         var messageOrMessages = this.messagesProvider();
+         var message = messageOrMessages[ key ] || messageOrMessages;
+         if( !message || ( typeof message === 'object' && !message.hasOwnProperty( key ) ) ) {
+            return ax.string.format(
+               'No message found for language tag "[languageTag]" and key "[key]".', {
+                  key: key,
+                  languageTag: this.languageTagProvider()
+               }
+            );
+         }
+         return optionalSubstitutions ? ax.string.format( message, optionalSubstitutions ) : message;
+      };
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
