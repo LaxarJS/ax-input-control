@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+## v2.0.1
+
 - [#27](https://github.com/LaxarJS/ax-input-control/issues/27): avoid use of LaxarJS' `object.extend`
 
 
