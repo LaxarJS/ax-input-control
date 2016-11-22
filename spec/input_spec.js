@@ -954,16 +954,23 @@ define( [
             $provide.decorator( '$controller', function( $delegate ) {
                return function( controllerName ) {
                   var controller = $delegate.apply( null, arguments );
+                  var constructor;
                   if( controllerName === 'AxInputController' ) {
                      axInputController = controller();
+                     constructor = function() {
+                        return axInputController;
+                     };
+
                      Object.keys( axInputController ).forEach( function( prop ) {
                         if( typeof axInputController[ prop ] === 'function' ) {
                            spyOn( axInputController, prop ).andCallThrough();
                         }
                      } );
-                     return ax.object.extend( function() {
-                        return axInputController;
-                     }, controller );
+                     Object.keys( controller ).forEach( function( prop ) {
+                        constructor[ prop ] = controller[ prop ];
+                     } );
+
+                     return constructor;
                   }
                   return controller;
                };
