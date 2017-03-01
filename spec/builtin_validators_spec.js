@@ -5,10 +5,11 @@
  */
 define( [
    '../ax-input-control',
-   'angular-mocks',
+   './builtin_validators_spec_data',
    'jquery',
-   './builtin_validators_spec_data'
-], function( inputModule, angularMocks, $, data ) {
+   'imports-loader?jQuery=jquery!angular',
+   'imports-loader?angular!exports-loader?angular.mocks!angular-mocks'
+], function( inputModule, data, $, ng ) {
    'use strict';
 
    describe( 'builtin validators', function() {
@@ -19,8 +20,8 @@ define( [
       var scope;
       var ngModel;
 
-      beforeEach( angularMocks.module( inputModule.name ) );
-      beforeEach( angularMocks.inject( function( _$compile_, _$rootScope_ ) {
+      beforeEach( ng.mock.module( inputModule.name ) );
+      beforeEach( ng.mock.inject( function( _$compile_, _$rootScope_ ) {
          $compile = _$compile_;
          $rootScope = _$rootScope_;
          $rootScope.i18n = {
@@ -36,9 +37,16 @@ define( [
          $.fn.tooltip = function() {
             return this;
          };
-
-         jasmine.Clock.useMock();
       } ) );
+
+
+      beforeEach( function() {
+         jasmine.clock().install();
+      } );
+
+      afterEach( function() {
+         jasmine.clock().uninstall();
+      } );
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -159,8 +167,9 @@ define( [
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function enter( $input, value ) {
-      $input.val( value );
-      $( $input ).trigger( 'change' );
+      $input.controller( 'ngModel' ).$setViewValue( value );
+      // $input.val( value );
+      // $( $input ).trigger( 'change' );
    }
 
 } );
