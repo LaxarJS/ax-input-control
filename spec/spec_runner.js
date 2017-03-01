@@ -1,2 +1,11 @@
-import './builtin_validators_spec.js';
-import './input_spec.js';
+/**
+ * Copyright 2015 aixigo AG
+ * Released under the MIT license.
+ * http://laxarjs.org/license
+ */
+define( [
+   './builtin_validators_spec.js',
+   './input_spec.js'
+], function() {
+   ':)';
+} );

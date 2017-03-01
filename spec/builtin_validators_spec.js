@@ -7,8 +7,8 @@ define( [
    '../ax-input-control',
    './builtin_validators_spec_data',
    'jquery',
-   'imports-loader?jQuery=jquery!angular',
-   'imports-loader?angular!exports-loader?angular.mocks!angular-mocks'
+   'angular',
+   'angular-mocks'
 ], function( inputModule, data, $, ng ) {
    'use strict';
 
@@ -22,8 +22,20 @@ define( [
 
       beforeEach( ng.mock.module( inputModule.name ) );
       beforeEach( ng.mock.inject( function( _$compile_, _$rootScope_ ) {
-         $compile = _$compile_;
+         $compile = function( source ) {
+            var compiled = _$compile_( source );
+            return function( scope ) {
+               // Ensure that the returned element wrapper includes the complete jQuery api. This makes the
+               // configuration of jQuery as AngularJS dependency redundant.
+               var element = compiled( scope );
+               var $element = $( element );
+               // We just have to re-attach the angular-specific controller method to the jQuery object again
+               $element.controller = element.controller;
+               return $element;
+            };
+         };
          $rootScope = _$rootScope_;
+
          $rootScope.i18n = {
             locale: 'default',
             tags: {
@@ -31,16 +43,13 @@ define( [
             }
          };
          scope = $rootScope.$new();
-
-         // We mock the jquery ui / bootstrap (whatever we use ...) tooltip here as it is not relevant
-         // in these tests
-         $.fn.tooltip = function() {
-            return this;
-         };
       } ) );
 
-
       beforeEach( function() {
+         $.fn.tooltip = jasmine.createSpy( 'tooltip' ).and.returnValue( {
+            on: function() { return this; }
+         } );
+
          jasmine.clock().install();
       } );
 
@@ -167,7 +176,7 @@ define( [
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function enter( $input, value ) {
-      $input.controller( 'ngModel' ).$setViewValue( value );
+      ng.element( $input ).controller( 'ngModel' ).$setViewValue( value );
       // $input.val( value );
       // $( $input ).trigger( 'change' );
    }

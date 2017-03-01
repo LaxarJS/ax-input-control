@@ -4,12 +4,12 @@
  * http://laxarjs.org/license
  */
 define( [
-   'laxar',
    '../ax-input-control',
+   'laxar',
    'jquery',
    'angular',
    'angular-mocks'
-], function( ax, inputModule, $, ng ) {
+], function( inputModule, ax, $, ng ) {
    'use strict';
 
    describe( 'An axInput control', function() {
@@ -32,23 +32,22 @@ define( [
             };
          };
          $rootScope = _$rootScope_;
-      } ) );
 
-      beforeEach( function() {
          $rootScope.i18n = {
             locale: 'default',
             tags: {
                'default': 'de_DE'
             }
          };
+      } ) );
 
-         var minTooltipApi = { on: function() { return minTooltipApi; } };
-         $.fn.tooltip = jasmine.createSpy( 'tooltip' ).and.returnValue( minTooltipApi );
+      beforeEach( function() {
+         $.fn.tooltip = jasmine.createSpy( 'tooltip' ).and.returnValue( {
+            on: function() { return this; }
+         } );
 
          jasmine.clock().install();
       } );
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       afterEach( function() {
          jasmine.clock().uninstall();

@@ -1,0 +1,10 @@
+language: node_js
+sudo: false
+node_js:
+   - "4"
+   - "6"
+   - "node" # latest
+notifications:
+   irc:
+      channels: "chat.freenode.net#laxarjs"
+      template: "%{repository_slug} (%{commit}) [%{branch}]: %{message}"
