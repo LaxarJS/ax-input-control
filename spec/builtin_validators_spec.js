@@ -5,10 +5,12 @@
  */
 define( [
    '../ax-input-control',
-   'angular-mocks',
+   './helpers',
+   './builtin_validators_spec_data',
    'jquery',
-   './builtin_validators_spec_data'
-], function( inputModule, angularMocks, $, data ) {
+   'angular',
+   'angular-mocks'
+], function( inputModule, helpers, data, $, ng ) {
    'use strict';
 
    describe( 'builtin validators', function() {
@@ -19,26 +21,26 @@ define( [
       var scope;
       var ngModel;
 
-      beforeEach( angularMocks.module( inputModule.name ) );
-      beforeEach( angularMocks.inject( function( _$compile_, _$rootScope_ ) {
-         $compile = _$compile_;
+      beforeEach( ng.mock.module( helpers.provideWidgetServices() ) );
+      beforeEach( ng.mock.module( inputModule.name ) );
+      beforeEach( ng.mock.inject( function( _$compile_, _$rootScope_ ) {
+         $compile = helpers.jQueryCompile( $, _$compile_ );
          $rootScope = _$rootScope_;
-         $rootScope.i18n = {
-            locale: 'default',
-            tags: {
-               'default': 'de_DE'
-            }
-         };
+
          scope = $rootScope.$new();
-
-         // We mock the jquery ui / bootstrap (whatever we use ...) tooltip here as it is not relevant
-         // in these tests
-         $.fn.tooltip = function() {
-            return this;
-         };
-
-         jasmine.Clock.useMock();
       } ) );
+
+      beforeEach( function() {
+         $.fn.tooltip = jasmine.createSpy( 'tooltip' ).and.returnValue( {
+            on: function() { return this; }
+         } );
+
+         jasmine.clock().install();
+      } );
+
+      afterEach( function() {
+         jasmine.clock().uninstall();
+      } );
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -160,7 +162,7 @@ define( [
 
    function enter( $input, value ) {
       $input.val( value );
-      $( $input ).trigger( 'change' );
+      helpers.triggerDomEvent( $input[0], 'change' );
    }
 
 } );

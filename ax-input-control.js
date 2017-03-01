@@ -8,10 +8,10 @@ define( [
    'angular',
    'laxar',
    'laxar-uikit',
-   'bootstrap/tooltip',
+   'imports-loader?jQuery=jquery!bootstrap/js/tooltip',
    './lib/helpers',
    './lib/builtin_validators',
-   'json!./messages.json'
+   'json-loader!./messages.json'
 ], function( $, ng, ax, ui, bootstrapTooltip, helpers, builtinValidators, messages ) {
    'use strict';
 
@@ -51,19 +51,17 @@ define( [
    // because the title attribute confuses bootstrap-tooltip, temporarily store it under this attribute
    var TOOLTIP_SOURCE_TITLE = 'ax-input-source-title';
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function configValue( key, fallback ) {
-      return ax.configuration.get( 'controls.laxar-input-control.' + key, fallback );
-   }
+   var CONFIG_PREFIX = 'controls.laxar-input-control.';
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    var controllerName = 'AxInputController';
-   var controller = [ function() {
+   var controller = [ 'axWidgetServices', function( services ) {
       var validators = [];
 
-      this.initialize = function( type, formattingOptions, languageTagProvider ) {
+      var axI18n = services.axI18n;
+
+      this.initialize = function( type, formattingOptions ) {
          assert.state(
             KNOWN_TYPES.indexOf( type ) !== -1,
             'Type has to be one of \\[' + ( KNOWN_TYPES.join( ', ' ) ) + '] but got ' + type + '.'
@@ -73,9 +71,8 @@ define( [
          this.parse = createParser( type, formattingOptions );
          this.format = createFormatter( type, formattingOptions );
 
-         this.languageTagProvider = languageTagProvider;
          this.messagesProvider = this.defaultMessagesProvider = function() {
-            return ax.i18n.localizeRelaxed( languageTagProvider(), messages );
+            return axI18n.localize( messages );
          };
       };
 
@@ -135,7 +132,7 @@ define( [
             return ax.string.format(
                'No message found for language tag "[languageTag]" and key "[key]".', {
                   key: key,
-                  languageTag: this.languageTagProvider()
+                  languageTag: axI18n.languageTag()
                }
             );
          }
@@ -169,7 +166,7 @@ define( [
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    var directiveName = 'axInput';
-   var directive = [ '$injector', '$window', function( $injector, $window ) {
+   var directive = [ '$injector', '$window', 'axWidgetServices', function( $injector, $window, services ) {
 
       var $animate = $injector.has( '$animate' ) ? $injector.get( '$animate' ) : {
          enabled: function() {
@@ -177,8 +174,11 @@ define( [
          }
       };
 
+      var axI18n = services.axI18n;
+      var axConfiguration = services.axConfiguration;
+
       var idCounter = 0;
-      var defaultDisplayErrorsImmediately = configValue( 'displayErrorsImmediately', true );
+      var defaultDisplayErrorsImmediately = axConfiguration.get( CONFIG_PREFIX + 'displayErrorsImmediately', true );
 
       return {
          restrict: 'A',
@@ -192,19 +192,19 @@ define( [
 
             var ngModelController = controllers[0];
             var axInputController = controllers[1];
-            var formattingOptions = getFormattingOptions( scope, attrs );
+            var formattingOptions = getFormattingOptions( formattingProvider );
 
-            scope.$watch( 'i18n', updateFormatting, true );
+            axI18n.whenLocaleChanged( updateFormatting );
             scope.$watch( attrs.axInputFormatting, updateFormatting, true );
 
-            function languageTagProvider() {
-               return ui.i18n.languageTagFromScope( scope );
+            function formattingProvider() {
+               return scope.$eval( attrs.axInputFormatting );
             }
 
             function updateFormatting( newValue, oldValue ) {
                if( newValue === oldValue ) { return; }
-               formattingOptions = getFormattingOptions( scope, attrs );
-               axInputController.initialize( valueType, formattingOptions, languageTagProvider );
+               formattingOptions = getFormattingOptions( formattingProvider );
+               axInputController.initialize( valueType, formattingOptions );
                ngModelController.$viewValue = axInputController.format( ngModelController.$modelValue );
                runFormatters();
                ngModelController.$render();
@@ -221,11 +221,11 @@ define( [
             var tooltipId;
             var fixTooltipPositionTimeout;
             var tooltipHideInProgress = false;
-            var tooltipHolder = attrs.axInputTooltipOnParent !== undefined ?
+            var tooltipHolder = $( attrs.axInputTooltipOnParent !== undefined ?
                element.parent() :
-               element;
+               element );
 
-            axInputController.initialize( valueType, formattingOptions, languageTagProvider );
+            axInputController.initialize( valueType, formattingOptions );
 
             initializeDisplayErrors();
 
@@ -617,10 +617,10 @@ define( [
                      tooltipHolder.attr( 'title', title );
                      tooltipHolder.attr( TOOLTIP_SOURCE_TITLE, null );
                   }
-                  tooltipHolder
-                     .off( 'shown hidden' )
-                     .tooltip( 'hide' )
-                     .tooltip( 'destroy' );
+                  tooltipHolder.off( 'shown hidden' );
+                  // Don't chain: tooltip returns the angular.element, without $.fn decorations
+                  tooltipHolder.tooltip( 'hide' );
+                  tooltipHolder.tooltip( 'destroy' );
                   clearTimeout( fixTooltipPositionTimeout );
                   $( '[data-ax-input-tooltip-id=' + tooltipId + ']' ).remove();
                   tooltipId = null;
@@ -664,10 +664,10 @@ define( [
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      function getFormattingOptions( scope, attrs ) {
-         var languageTag = ui.i18n.languageTagFromScope( scope );
-         var momentFormat = ui.i18n.momentFormatForLanguageTag( languageTag );
-         var numberFormat = ui.i18n.numberFormatForLanguageTag( languageTag );
+      function getFormattingOptions( formattingProvider ) {
+         var i18n = ui.i18n.create( axI18n );
+         var momentFormat = axI18n.localize( i18n.momentFormats );
+         var numberFormat = axI18n.localize( i18n.numberFormats );
          var format = ax.object.options( {
             decimalSeparator: numberFormat.d,
             groupingSeparator: numberFormat.g,
@@ -675,7 +675,7 @@ define( [
             timeFormat: momentFormat.time
          }, DEFAULT_FORMATTING );
 
-         return ax.object.options( scope.$eval( attrs.axInputFormatting ), format );
+         return ax.object.options( formattingProvider(), format );
       }
 
    } ];
@@ -686,8 +686,9 @@ define( [
    // overridden locally). To achieve this, the ngModel directive is decorated:
    // http://www.jonsamwell.com/angularjs-set-default-blur-behaviour-on-ngmodeloptions
    var configureNgModelOptions = [ '$provide', function( $provide ) {
-      $provide.decorator( 'ngModelDirective', [ '$delegate', function( $delegate ) {
-         var defaultNgModelOptions = configValue( 'ngModelOptions', {} );
+      $provide.decorator( 'ngModelDirective', [ '$delegate', 'axWidgetServices', function( $delegate, services ) {
+         var axConfiguration = services.axConfiguration;
+         var defaultNgModelOptions = axConfiguration.get( CONFIG_PREFIX + 'ngModelOptions', {} );
          var directive = $delegate[ 0 ];
          var compile = directive.compile;
          directive.compile = function() {
@@ -700,13 +701,22 @@ define( [
                   }
 
                   var ngModelController = controllers[ 0 ];
-                  ng.forEach( defaultNgModelOptions, function( value, key ) {
-                     // if the option is specified by the developer, leave it unmodified:
-                     ngModelController.$options = ngModelController.$options || {};
-                     if( !( key in ngModelController.$options ) ) {
-                        ngModelController.$options[ key ] = ax.object.deepClone( value );
-                     }
-                  } );
+
+                  if( ngModelController.$options && ngModelController.$options.createChild ) {
+                     // since Angular 1.6, see: https://github.com/angular/angular.js/issues/12884
+                     var newOptions = ax.object.deepClone( defaultNgModelOptions );
+                     newOptions['*'] = '$inherit';
+                     ngModelController.$options = ngModelController.$options.createChild( newOptions );
+                  }
+                  else {
+                     ng.forEach( defaultNgModelOptions, function( value, key ) {
+                        // if the option is specified by the developer, leave it unmodified:
+                        ngModelController.$options = ngModelController.$options || {};
+                        if( !( key in ngModelController.$options ) ) {
+                           ngModelController.$options[ key ] = ax.object.deepClone( value );
+                        }
+                     } );
+                  }
                },
                post: function() {
                   link.post.apply( this, arguments );
