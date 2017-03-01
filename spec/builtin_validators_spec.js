@@ -5,10 +5,11 @@
  */
 define( [
    '../ax-input-control',
-   'angular-mocks',
+   './builtin_validators_spec_data',
    'jquery',
-   './builtin_validators_spec_data'
-], function( inputModule, angularMocks, $, data ) {
+   'angular',
+   'angular-mocks'
+], function( inputModule, data, $, ng ) {
    'use strict';
 
    describe( 'builtin validators', function() {
@@ -19,10 +20,22 @@ define( [
       var scope;
       var ngModel;
 
-      beforeEach( angularMocks.module( inputModule.name ) );
-      beforeEach( angularMocks.inject( function( _$compile_, _$rootScope_ ) {
-         $compile = _$compile_;
+      beforeEach( ng.mock.module( inputModule.name ) );
+      beforeEach( ng.mock.inject( function( _$compile_, _$rootScope_ ) {
+         $compile = function( source ) {
+            var compiled = _$compile_( source );
+            return function( scope ) {
+               // Ensure that the returned element wrapper includes the complete jQuery api. This makes the
+               // configuration of jQuery as AngularJS dependency redundant.
+               var element = compiled( scope );
+               var $element = $( element );
+               // We just have to re-attach the angular-specific controller method to the jQuery object again
+               $element.controller = element.controller;
+               return $element;
+            };
+         };
          $rootScope = _$rootScope_;
+
          $rootScope.i18n = {
             locale: 'default',
             tags: {
@@ -30,15 +43,19 @@ define( [
             }
          };
          scope = $rootScope.$new();
-
-         // We mock the jquery ui / bootstrap (whatever we use ...) tooltip here as it is not relevant
-         // in these tests
-         $.fn.tooltip = function() {
-            return this;
-         };
-
-         jasmine.Clock.useMock();
       } ) );
+
+      beforeEach( function() {
+         $.fn.tooltip = jasmine.createSpy( 'tooltip' ).and.returnValue( {
+            on: function() { return this; }
+         } );
+
+         jasmine.clock().install();
+      } );
+
+      afterEach( function() {
+         jasmine.clock().uninstall();
+      } );
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -159,8 +176,9 @@ define( [
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function enter( $input, value ) {
-      $input.val( value );
-      $( $input ).trigger( 'change' );
+      ng.element( $input ).controller( 'ngModel' ).$setViewValue( value );
+      // $input.val( value );
+      // $( $input ).trigger( 'change' );
    }
 
 } );

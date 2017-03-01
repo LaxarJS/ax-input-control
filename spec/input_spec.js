@@ -4,11 +4,12 @@
  * http://laxarjs.org/license
  */
 define( [
-   'laxar',
    '../ax-input-control',
-   'angular-mocks',
-   'jquery'
-], function( ax, inputModule, ngMocks, $ ) {
+   'laxar',
+   'jquery',
+   'angular',
+   'angular-mocks'
+], function( inputModule, ax, $, ng ) {
    'use strict';
 
    describe( 'An axInput control', function() {
@@ -16,19 +17,21 @@ define( [
       var $compile;
       var $rootScope;
 
-      beforeEach( function() {
-         ngMocks.module( inputModule.name );
-         ngMocks.inject( function( _$compile_, _$rootScope_ ) {
-            $compile = function( source ) {
-               var compiled = _$compile_( source );
-               return function( scope ) {
-                  // Ensure that the returned element wrapper includes the complete jQuery api. This makes the
-                  // configuration of jQuery as AngularJS dependency redundant.
-                  return $( compiled( scope ) );
-               };
+      beforeEach( ng.mock.module( inputModule.name ) );
+      beforeEach( ng.mock.inject( function( _$compile_, _$rootScope_ ) {
+         $compile = function( source ) {
+            var compiled = _$compile_( source );
+            return function( scope ) {
+               // Ensure that the returned element wrapper includes the complete jQuery api. This makes the
+               // configuration of jQuery as AngularJS dependency redundant.
+               var element = compiled( scope );
+               var $element = $( element );
+               // We just have to re-attach the angular-specific controller method to the jQuery object again
+               $element.controller = element.controller;
+               return $element;
             };
-            $rootScope = _$rootScope_;
-         } );
+         };
+         $rootScope = _$rootScope_;
 
          $rootScope.i18n = {
             locale: 'default',
@@ -36,16 +39,18 @@ define( [
                'default': 'de_DE'
             }
          };
+      } ) );
 
-         var minTooltipApi = { on: function() { return minTooltipApi; } };
-         $.fn.tooltip = jasmine.createSpy( 'tooltip' ).andReturn( minTooltipApi );
+      beforeEach( function() {
+         $.fn.tooltip = jasmine.createSpy( 'tooltip' ).and.returnValue( {
+            on: function() { return this; }
+         } );
 
-         jasmine.Clock.useMock();
+         jasmine.clock().install();
       } );
 
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
       afterEach( function() {
+         jasmine.clock().uninstall();
          window.scrollTo( 0, 0 );
       } );
 
@@ -115,7 +120,7 @@ define( [
                return 'Value must be smaller than 50000';
             } );
 
-            spyOn( axInputController, 'performSemanticValidations' ).andCallThrough();
+            spyOn( axInputController, 'performSemanticValidations' ).and.callThrough();
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,7 +197,7 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'that is omitted if there is pending syntactical error', function() {
-               axInputController.performSemanticValidations.reset();
+               axInputController.performSemanticValidations.calls.reset();
                ngModelController.$error.syntax = true;
                ngModelController.$parsers[1]( 12345.56 );
 
@@ -208,9 +213,10 @@ define( [
       describe( 'when the value is numeric with grouping separators', function() {
 
          var $element;
+         var scope;
 
          beforeEach( function() {
-            var scope = $rootScope.$new();
+            scope = $rootScope.$new();
 
             $element = $compile( '<input data-ax-input="integer" data-ng-model="someValue"/>' )( scope );
             $element.appendTo( 'body' );
@@ -235,7 +241,7 @@ define( [
 
          it( 'removes the grouping separators on focus and re-adds them on blur', function() {
             $element.trigger( 'focusin' );
-            jasmine.Clock.tick( 0 );
+            jasmine.clock().tick( 0 );
 
             expect( $element.val() ).toEqual( '1231442' );
 
@@ -281,7 +287,8 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'places the tooltip on the left', function() {
-               var options = $.fn.tooltip.calls[0].args[0];
+               expect( $.fn.tooltip.calls.count() ).toEqual(1);
+               var options = $.fn.tooltip.calls.argsFor(0)[0];
                expect( options.placement() ).toEqual( 'left' );
             } );
 
@@ -302,7 +309,8 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'places the tooltip on the left', function() {
-               var options = $.fn.tooltip.calls[0].args[0];
+               expect( $.fn.tooltip.calls.count() ).toEqual(1);
+               var options = $.fn.tooltip.calls.argsFor(0)[0];
                expect( options.placement() ).toEqual( 'top' );
             } );
 
@@ -342,7 +350,7 @@ define( [
 
             it( 'updates its validation state on change', function() {
                $element[0].value = '50';
-               $element.trigger( 'change' );
+               triggerDomEvent( $element[0], 'change' );
                expect( $element.hasClass( 'ax-error' ) ).toBe( true );
             } );
 
@@ -361,11 +369,11 @@ define( [
 
             it( 'updates its validation state on keypress', function() {
                $element[0].value = '50';
-               $element.trigger( 'focusout' );
+               triggerDomEvent( $element[0], 'change' );
                expect( $element.hasClass( 'ax-error' ) ).toBe( false );
 
-               $element[0].value = '50';
-               $element.trigger( 'keypress' );
+
+               triggerDomEvent( $element[0], 'keypress' );
                expect( $element.hasClass( 'ax-error' ) ).toBe( true );
             } );
 
@@ -382,10 +390,11 @@ define( [
 
             it( 'updates its validation state on focusout', function() {
                $element[0].value = '50';
-               $element.trigger( 'keydown' );
+               triggerDomEvent( $element[0], 'keydown' );
+               triggerDomEvent( $element[0], 'change' );
                expect( $element.hasClass( 'ax-error' ) ).toBe( false );
 
-               $element.trigger( 'focusout' );
+               triggerDomEvent( $element[0], 'focusout' );
                expect( $element.hasClass( 'ax-error' ) ).toBe( true );
             } );
 
@@ -403,7 +412,7 @@ define( [
 
             beforeEach( function() {
                var origGet = ax.configuration.get;
-               spyOn( ax.configuration, 'get' ).andCallFake( function( key, fallback ) {
+               spyOn( ax.configuration, 'get' ).and.callFake( function( key, fallback ) {
                   return key === configKey ? configValue : origGet( key, fallback );
                } );
             } );
@@ -420,10 +429,10 @@ define( [
 
                it( 'updates its validation state on focusout', function() {
                   $element[0].value = '50';
-                  $element.trigger( 'keydown' );
+                  triggerDomEvent( $element[0], 'change' );
                   expect( $element.hasClass( 'ax-error' ) ).toBe( false );
 
-                  $element.trigger( 'focusout' );
+                  triggerDomEvent( $element[0], 'focusout' );
                   expect( $element.hasClass( 'ax-error' ) ).toBe( true );
                } );
 
@@ -499,22 +508,22 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'creates, then shows a tooltip on focus', function() {
-               $.fn.tooltip.reset();
+               $.fn.tooltip.calls.reset();
 
                $element.trigger( 'focusin' );
                expect( $.fn.tooltip ).toHaveBeenCalledWith( jasmine.any( Object ) );
-               jasmine.Clock.tick( 0 );
+               jasmine.clock().tick( 0 );
                expect( $.fn.tooltip ).toHaveBeenCalledWith( 'show' );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'masks any title attribute so it does not change the validation message', function() {
-               $.fn.tooltip.reset();
+               $.fn.tooltip.calls.reset();
 
                $element.trigger( 'focusin' );
                expect( $.fn.tooltip ).toHaveBeenCalledWith( jasmine.any( Object ) );
-               jasmine.Clock.tick( 0 );
+               jasmine.clock().tick( 0 );
                expect( $element.attr( 'title' ) ).toBeUndefined();
             } );
 
@@ -535,9 +544,9 @@ define( [
 
             it( 'hides the tooltip on blur', function() {
                $element.trigger( 'focusin' );
-               $.fn.tooltip.reset();
+               $.fn.tooltip.calls.reset();
                $element.trigger( 'blur' );
-               jasmine.Clock.tick( 100 );
+               jasmine.clock().tick( 100 );
                expect( $.fn.tooltip ).toHaveBeenCalledWith( 'hide' );
             } );
 
@@ -545,9 +554,9 @@ define( [
 
             it( 'restores any title attribute on blur', function() {
                $element.trigger( 'focusin' );
-               $.fn.tooltip.reset();
+               $.fn.tooltip.calls.reset();
                $element.trigger( 'blur' );
-               jasmine.Clock.tick( 200 );
+               jasmine.clock().tick( 200 );
                expect( $element.attr( 'title' ) ).toEqual( 'ignore me' );
             } );
 
@@ -557,7 +566,7 @@ define( [
 
                beforeEach( function() {
                   $element.trigger( 'focusin' );
-                  $.fn.tooltip.reset();
+                  $.fn.tooltip.calls.reset();
                   scope.$apply( function() {
                      scope.someValue = 1200;
                   } );
@@ -572,7 +581,7 @@ define( [
                ///////////////////////////////////////////////////////////////////////////////////////////////
 
                it( 'hides the tooltip', function() {
-                  jasmine.Clock.tick( 100 );
+                  jasmine.clock().tick( 100 );
                   expect( $.fn.tooltip ).toHaveBeenCalledWith( 'hide' );
                } );
 
@@ -593,7 +602,7 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'does not show a tooltip on focus', function() {
-               $.fn.tooltip.reset();
+               $.fn.tooltip.calls.reset();
                $element.trigger( 'focusin' );
                expect( $.fn.tooltip ).not.toHaveBeenCalledWith( 'show' );
             } );
@@ -624,10 +633,10 @@ define( [
                ///////////////////////////////////////////////////////////////////////////////////////////////
 
                it( 'shows a tooltip on focus', function() {
-                  $.fn.tooltip.reset();
+                  $.fn.tooltip.calls.reset();
                   $element.trigger( 'focusin' );
                   expect( $.fn.tooltip ).toHaveBeenCalledWith( jasmine.any( Object ) );
-                  jasmine.Clock.tick( 0 );
+                  jasmine.clock().tick( 0 );
                   expect( $.fn.tooltip ).toHaveBeenCalledWith( 'show' );
                } );
 
@@ -657,7 +666,7 @@ define( [
                   ////////////////////////////////////////////////////////////////////////////////////////////
 
                   it( 'does not show a tooltip on focus', function() {
-                     $.fn.tooltip.reset();
+                     $.fn.tooltip.calls.reset();
                      $element.focus();
                      expect( $.fn.tooltip ).not.toHaveBeenCalledWith( 'show' );
                   } );
@@ -690,7 +699,7 @@ define( [
                   ////////////////////////////////////////////////////////////////////////////////////////////
 
                   it( 'does not show a tooltip on focus', function() {
-                     $.fn.tooltip.reset();
+                     $.fn.tooltip.calls.reset();
                      $element.focus();
                      expect( $.fn.tooltip ).not.toHaveBeenCalledWith( 'show' );
                   } );
@@ -748,7 +757,7 @@ define( [
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'configures the tooltip to open to either left or right', function() {
-            var options = $.fn.tooltip.calls[0].args[0];
+            var options = $.fn.tooltip.calls.argsFor(0)[0];
             expect( [ 'left', 'right' ].indexOf( options.placement() ) ).not.toBe( -1 );
          } );
 
@@ -772,8 +781,8 @@ define( [
       };
       var controller;
 
-      beforeEach( ngMocks.module( inputModule.name ) );
-      beforeEach( ngMocks.inject( function( $controller ) {
+      beforeEach( ng.mock.module( inputModule.name ) );
+      beforeEach( ng.mock.inject( function( $controller ) {
          controller = $controller( 'AxInputController' );
       } ) );
 
@@ -796,9 +805,9 @@ define( [
             'Details: Type has to be one of \\[date, time, decimal, integer, string, select] but got ';
 
          expect( function() { controller.initialize( null, DEFAULT_FORMATTING ); } )
-            .toThrow( assertionError + 'null.');
+            .toThrow( new Error( assertionError + 'null.' ) );
          expect( function() { controller.initialize( 'boolean', DEFAULT_FORMATTING ); } )
-            .toThrow( assertionError + 'boolean.');
+            .toThrow( new Error( assertionError + 'boolean.' ) );
       } );
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -828,7 +837,7 @@ define( [
          it( 'instantiates a formatter for the given type', function() {
             expect( controller.format( 12345.12 ) ).toEqual( '12.345,12' );
             expect( function() { controller.format( 'Hi' ); } )
-               .toThrow( 'Expected argument of type number, but got "string". Value: Hi' );
+               .toThrow( new Error( 'Expected argument of type number, but got "string". Value: Hi' ) );
          } );
 
       } );
@@ -882,10 +891,10 @@ define( [
          var result;
 
          beforeEach( function() {
-            successfulValidator = jasmine.createSpy( 'successfulValidator' ).andReturn( true );
-            successfulMessage = jasmine.createSpy( 'successfulMessage' ).andReturn( 'Dont call on me!' );
-            failingValidator = jasmine.createSpy( 'failingValidator' ).andReturn( false );
-            failingMessage = jasmine.createSpy( 'failingMessage' ).andReturn( 'There was an error.' );
+            successfulValidator = jasmine.createSpy( 'successfulValidator' ).and.returnValue( true );
+            successfulMessage = jasmine.createSpy( 'successfulMessage' ).and.returnValue( 'Dont call on me!' );
+            failingValidator = jasmine.createSpy( 'failingValidator' ).and.returnValue( false );
+            failingMessage = jasmine.createSpy( 'failingMessage' ).and.returnValue( 'There was an error.' );
 
             controller.addSemanticValidator( successfulValidator, successfulMessage );
             controller.addSemanticValidator( failingValidator, failingMessage );
@@ -897,22 +906,22 @@ define( [
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'calls all validators with the given value', function() {
-            expect( successfulValidator.calls.length ).toEqual( 1 );
-            expect( successfulValidator.calls[0].args[0] ).toEqual( 12345 );
+            expect( successfulValidator.calls.count() ).toEqual( 1 );
+            expect( successfulValidator.calls.argsFor(0)[0] ).toEqual( 12345 );
 
-            expect( failingValidator.calls.length ).toEqual( 2 );
-            expect( failingValidator.calls[0].args[0] ).toEqual( 12345 );
-            expect( failingValidator.calls[1].args[0] ).toEqual( 12345 );
+            expect( failingValidator.calls.count() ).toEqual( 2 );
+            expect( failingValidator.calls.argsFor(0)[0] ).toEqual( 12345 );
+            expect( failingValidator.calls.argsFor(1)[0] ).toEqual( 12345 );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'calls the message factories for all failing validators with the given value', function() {
-            expect( successfulMessage.calls.length ).toEqual( 0 );
+            expect( successfulMessage.calls.count() ).toEqual( 0 );
 
-            expect( failingMessage.calls.length ).toEqual( 2 );
-            expect( failingMessage.calls[0].args[0] ).toEqual( 12345 );
-            expect( failingMessage.calls[1].args[0] ).toEqual( 12345 );
+            expect( failingMessage.calls.count() ).toEqual( 2 );
+            expect( failingMessage.calls.argsFor(0)[0] ).toEqual( 12345 );
+            expect( failingMessage.calls.argsFor(1)[0] ).toEqual( 12345 );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -948,9 +957,9 @@ define( [
       var element;
       var axInputController;
 
-      beforeEach( ngMocks.module( inputModule.name ) );
+      beforeEach( ng.mock.module( inputModule.name ) );
       beforeEach( function() {
-         ngMocks.module( function( $provide ) {
+         ng.mock.module( function( $provide ) {
             $provide.decorator( '$controller', function( $delegate ) {
                return function( controllerName ) {
                   var controller = $delegate.apply( null, arguments );
@@ -963,7 +972,7 @@ define( [
 
                      Object.keys( axInputController ).forEach( function( prop ) {
                         if( typeof axInputController[ prop ] === 'function' ) {
-                           spyOn( axInputController, prop ).andCallThrough();
+                           spyOn( axInputController, prop ).and.callThrough();
                         }
                      } );
                      Object.keys( controller ).forEach( function( prop ) {
@@ -977,7 +986,7 @@ define( [
             } );
          } );
 
-         ngMocks.inject( function( $compile, $rootScope ) {
+         ng.mock.inject( function( $compile, $rootScope ) {
             scope = $rootScope.$new();
             scope.value = 'Hi there';
             scope.validationMessage = 'This is wrong!';
@@ -995,10 +1004,47 @@ define( [
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       it( 'returns the currently bound error message in its message provider function', function() {
-         var func = axInputController.setCustomValidationMessageProvider.calls[0].args[0];
+         var func = axInputController.setCustomValidationMessageProvider.calls.argsFor(0)[0];
          expect( func() ).toEqual( 'This is wrong!' );
       } );
 
    } );
+
+   function triggerDomEvent( element, type ) {
+      var event;
+      var className = 'Event';
+      var bubbles = true;
+      var cancelable = true;
+      switch( type ) {
+         case 'keypress':
+         case 'keydown':
+            className = 'KeyboardEvent';
+            break;
+         case 'focusin':
+         case 'focusout':
+            cancelable = false;
+            className = 'FocusEvent';
+            break;
+         case 'focus':
+         case 'blur':
+            bubbles = false;
+            cancelable = false;
+            className = 'FocusEvent';
+            break;
+      }
+
+      try {
+         event = new window[ className ]( type, {
+            bubbles: bubbles,
+            cancelable: cancelable
+         } );
+      }
+      catch( error ) {
+         event = document.createEvent( className );
+         event.initEvent( type, bubbles, cancelable );
+      }
+
+      element.dispatchEvent( event );
+   }
 
 } );
