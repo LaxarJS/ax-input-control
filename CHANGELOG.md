@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#29](https://github.com/LaxarJS/ax-input-control/issues/29): update to webpack, LaxarJS 2, Angular 1.6 and Jasmine 2
+    + **BREAKING CHANGE:** see ticket for details
 - [#27](https://github.com/LaxarJS/ax-input-control/issues/27): avoid use of LaxarJS' `object.extend`
 
 
