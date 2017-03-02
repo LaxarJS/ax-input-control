@@ -25,8 +25,6 @@ function karmaConfig() {
       process.env.TRAVIS ? 'ChromeTravisCi' : 'Chrome'
    ];
 
-   //browsers.splice(1);
-
    return {
       frameworks: [ 'jasmine' ],
       files: files( specsPattern, [ polyfillsPath ], assetsPatterns ),
