@@ -56,12 +56,10 @@ function karmaConfig() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function webpackConfig() {
-   var config = Object.assign( {}, require('./webpack.config' ) );
-   config.devtool = 'inline-source-map';
-   delete config.externals;
-   delete config.entry;
-   delete config.output;
-   return config;
+   return require( './webpack.config.js' ).webpack( {
+      context: __dirname,
+      devtool: 'inline-source-map'
+   } ).config();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
