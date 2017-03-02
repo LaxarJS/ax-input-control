@@ -5,32 +5,30 @@
  */
 define( [
    '../ax-input-control',
+   './helpers',
    'laxar',
    'jquery',
    'angular',
    'angular-mocks'
-], function( inputModule, ax, $, ng ) {
+], function( inputModule, helpers, ax, $, ng ) {
    'use strict';
+
+   var axConfiguration;
+   var axI18n;
 
    describe( 'An axInput control', function() {
 
       var $compile;
       var $rootScope;
 
+      beforeEach( ng.mock.module( helpers.provideWidgetServices( function( services ) {
+         axConfiguration = services.axConfiguration;
+         axI18n = services.axI18n;
+      } ) ) );
       beforeEach( ng.mock.module( inputModule.name ) );
+
       beforeEach( ng.mock.inject( function( _$compile_, _$rootScope_ ) {
-         $compile = function( source ) {
-            var compiled = _$compile_( source );
-            return function( scope ) {
-               // Ensure that the returned element wrapper includes the complete jQuery api. This makes the
-               // configuration of jQuery as AngularJS dependency redundant.
-               var element = compiled( scope );
-               var $element = $( element );
-               // We just have to re-attach the angular-specific controller method to the jQuery object again
-               $element.controller = element.controller;
-               return $element;
-            };
-         };
+         $compile = helpers.jQueryCompile( $, _$compile_ );
          $rootScope = _$rootScope_;
 
          $rootScope.i18n = {
@@ -350,7 +348,7 @@ define( [
 
             it( 'updates its validation state on change', function() {
                $element[0].value = '50';
-               triggerDomEvent( $element[0], 'change' );
+               helpers.triggerDomEvent( $element[0], 'change' );
                expect( $element.hasClass( 'ax-error' ) ).toBe( true );
             } );
 
@@ -369,11 +367,11 @@ define( [
 
             it( 'updates its validation state on keypress', function() {
                $element[0].value = '50';
-               triggerDomEvent( $element[0], 'change' );
+               helpers.triggerDomEvent( $element[0], 'change' );
                expect( $element.hasClass( 'ax-error' ) ).toBe( false );
 
 
-               triggerDomEvent( $element[0], 'keypress' );
+               helpers.triggerDomEvent( $element[0], 'keypress' );
                expect( $element.hasClass( 'ax-error' ) ).toBe( true );
             } );
 
@@ -390,11 +388,11 @@ define( [
 
             it( 'updates its validation state on focusout', function() {
                $element[0].value = '50';
-               triggerDomEvent( $element[0], 'keydown' );
-               triggerDomEvent( $element[0], 'change' );
+               helpers.triggerDomEvent( $element[0], 'keydown' );
+               helpers.triggerDomEvent( $element[0], 'change' );
                expect( $element.hasClass( 'ax-error' ) ).toBe( false );
 
-               triggerDomEvent( $element[0], 'focusout' );
+               helpers.triggerDomEvent( $element[0], 'focusout' );
                expect( $element.hasClass( 'ax-error' ) ).toBe( true );
             } );
 
@@ -408,31 +406,23 @@ define( [
                        'data-ax-input-display-errors-immediately="true" ax-input-minimum-value="100"/>';
 
             var configKey = 'controls.laxar-input-control.ngModelOptions';
-            var configValue;
-
-            beforeEach( function() {
-               var origGet = ax.configuration.get;
-               spyOn( ax.configuration, 'get' ).and.callFake( function( key, fallback ) {
-                  return key === configKey ? configValue : origGet( key, fallback );
-               } );
-            } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             describe( 'with updateOn set to "focusout"', function() {
 
                beforeEach( function() {
-                  configValue = { 'updateOn': 'focusout' };
+                  axConfiguration.set( configKey, { 'updateOn': 'focusout' } );
                   $element = $compile( html )( scope );
                   $element.appendTo( 'body' );
                } );
 
                it( 'updates its validation state on focusout', function() {
                   $element[0].value = '50';
-                  triggerDomEvent( $element[0], 'change' );
+                  helpers.triggerDomEvent( $element[0], 'change' );
                   expect( $element.hasClass( 'ax-error' ) ).toBe( false );
 
-                  triggerDomEvent( $element[0], 'focusout' );
+                  helpers.triggerDomEvent( $element[0], 'focusout' );
                   expect( $element.hasClass( 'ax-error' ) ).toBe( true );
                } );
 
@@ -781,6 +771,10 @@ define( [
       };
       var controller;
 
+      beforeEach( ng.mock.module( helpers.provideWidgetServices( function( services ) {
+         axConfiguration = services.axConfiguration;
+         axI18n = services.axI18n;
+      } ) ) );
       beforeEach( ng.mock.module( inputModule.name ) );
       beforeEach( ng.mock.inject( function( $controller ) {
          controller = $controller( 'AxInputController' );
@@ -957,6 +951,10 @@ define( [
       var element;
       var axInputController;
 
+      beforeEach( ng.mock.module( helpers.provideWidgetServices( function( services ) {
+         axConfiguration = services.axConfiguration;
+         axI18n = services.axI18n;
+      } ) ) );
       beforeEach( ng.mock.module( inputModule.name ) );
       beforeEach( function() {
          ng.mock.module( function( $provide ) {
@@ -1009,42 +1007,5 @@ define( [
       } );
 
    } );
-
-   function triggerDomEvent( element, type ) {
-      var event;
-      var className = 'Event';
-      var bubbles = true;
-      var cancelable = true;
-      switch( type ) {
-         case 'keypress':
-         case 'keydown':
-            className = 'KeyboardEvent';
-            break;
-         case 'focusin':
-         case 'focusout':
-            cancelable = false;
-            className = 'FocusEvent';
-            break;
-         case 'focus':
-         case 'blur':
-            bubbles = false;
-            cancelable = false;
-            className = 'FocusEvent';
-            break;
-      }
-
-      try {
-         event = new window[ className ]( type, {
-            bubbles: bubbles,
-            cancelable: cancelable
-         } );
-      }
-      catch( error ) {
-         event = document.createEvent( className );
-         event.initEvent( type, bubbles, cancelable );
-      }
-
-      element.dispatchEvent( event );
-   }
 
 } );

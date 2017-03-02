@@ -15,7 +15,6 @@ const name = package.name;
 const main = path.resolve( directory, package.main || `${name}.js` );
 const browser = path.relative( directory, package.browser || `dist/${name}.js` );
 const alias = {
-   laxar$: 'laxar/dist/laxar-compatibility.with-deps'
 };
 const externals = Object.keys( package.peerDependencies ).reduce( (externals, name) => {
    const key = `${name}$`;

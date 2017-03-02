@@ -149,7 +149,7 @@ define( {
                constraint: 'required',
                constraintValue: 'true',
                inputs: [ '', '   ', '\n' ],
-               expected: [ '', '   ', '\n' ]
+               expected: [ '', '', '' ]
             }
          ]
       }

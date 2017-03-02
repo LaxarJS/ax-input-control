@@ -51,17 +51,15 @@ define( [
    // because the title attribute confuses bootstrap-tooltip, temporarily store it under this attribute
    var TOOLTIP_SOURCE_TITLE = 'ax-input-source-title';
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function configValue( key, fallback ) {
-      return ax.configuration.get( 'controls.laxar-input-control.' + key, fallback );
-   }
+   var CONFIG_PREFIX = 'controls.laxar-input-control.';
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    var controllerName = 'AxInputController';
-   var controller = [ function() {
+   var controller = [ 'axWidgetServices', function( services ) {
       var validators = [];
+
+      var axI18n = services.axI18n;
 
       this.initialize = function( type, formattingOptions, languageTagProvider ) {
          assert.state(
@@ -75,7 +73,7 @@ define( [
 
          this.languageTagProvider = languageTagProvider;
          this.messagesProvider = this.defaultMessagesProvider = function() {
-            return ax.i18n.localizeRelaxed( languageTagProvider(), messages );
+            return axI18n.localizeRelaxed( languageTagProvider(), messages );
          };
       };
 
@@ -169,7 +167,7 @@ define( [
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    var directiveName = 'axInput';
-   var directive = [ '$injector', '$window', function( $injector, $window ) {
+   var directive = [ '$injector', '$window', 'axWidgetServices', function( $injector, $window, services ) {
 
       var $animate = $injector.has( '$animate' ) ? $injector.get( '$animate' ) : {
          enabled: function() {
@@ -177,8 +175,11 @@ define( [
          }
       };
 
+      var axI18n = services.axI18n;
+      var axConfiguration = services.axConfiguration;
+
       var idCounter = 0;
-      var defaultDisplayErrorsImmediately = configValue( 'displayErrorsImmediately', true );
+      var defaultDisplayErrorsImmediately = axConfiguration.get( CONFIG_PREFIX + 'displayErrorsImmediately', true );
 
       return {
          restrict: 'A',
@@ -198,7 +199,7 @@ define( [
             scope.$watch( attrs.axInputFormatting, updateFormatting, true );
 
             function languageTagProvider() {
-               return ax.i18n.languageTagFromI18n( scope.$eval( "i18n" ) ) || 'en';
+               return axI18n.languageTagFromI18n( scope.$eval( "i18n" ) ) || 'en';
             }
 
             function formattingProvider() {
@@ -669,7 +670,7 @@ define( [
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       function getFormattingOptions( languageTagProvider, formattingProvider ) {
-         var i18n = ui.i18n.create( ax.i18n );
+         var i18n = ui.i18n.create( axI18n );
          var languageTag = languageTagProvider();
          var momentFormat = i18n.momentFormatForLanguageTag( languageTag );
          var numberFormat = i18n.numberFormatForLanguageTag( languageTag );
@@ -691,8 +692,9 @@ define( [
    // overridden locally). To achieve this, the ngModel directive is decorated:
    // http://www.jonsamwell.com/angularjs-set-default-blur-behaviour-on-ngmodeloptions
    var configureNgModelOptions = [ '$provide', function( $provide ) {
-      $provide.decorator( 'ngModelDirective', [ '$delegate', function( $delegate ) {
-         var defaultNgModelOptions = configValue( 'ngModelOptions', {} );
+      $provide.decorator( 'ngModelDirective', [ '$delegate', 'axWidgetServices', function( $delegate, services ) {
+         var axConfiguration = services.axConfiguration;
+         var defaultNgModelOptions = axConfiguration.get( CONFIG_PREFIX + 'ngModelOptions', {} );
          var directive = $delegate[ 0 ];
          var compile = directive.compile;
          directive.compile = function() {

@@ -5,11 +5,12 @@
  */
 define( [
    '../ax-input-control',
+   './helpers',
    './builtin_validators_spec_data',
    'jquery',
    'angular',
    'angular-mocks'
-], function( inputModule, data, $, ng ) {
+], function( inputModule, helpers, data, $, ng ) {
    'use strict';
 
    describe( 'builtin validators', function() {
@@ -20,20 +21,10 @@ define( [
       var scope;
       var ngModel;
 
+      beforeEach( ng.mock.module( helpers.provideWidgetServices() ) );
       beforeEach( ng.mock.module( inputModule.name ) );
       beforeEach( ng.mock.inject( function( _$compile_, _$rootScope_ ) {
-         $compile = function( source ) {
-            var compiled = _$compile_( source );
-            return function( scope ) {
-               // Ensure that the returned element wrapper includes the complete jQuery api. This makes the
-               // configuration of jQuery as AngularJS dependency redundant.
-               var element = compiled( scope );
-               var $element = $( element );
-               // We just have to re-attach the angular-specific controller method to the jQuery object again
-               $element.controller = element.controller;
-               return $element;
-            };
-         };
+         $compile = helpers.jQueryCompile( $, _$compile_ );
          $rootScope = _$rootScope_;
 
          $rootScope.i18n = {
@@ -176,9 +167,8 @@ define( [
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function enter( $input, value ) {
-      ng.element( $input ).controller( 'ngModel' ).$setViewValue( value );
-      // $input.val( value );
-      // $( $input ).trigger( 'change' );
+      $input.val( value );
+      helpers.triggerDomEvent( $input[0], 'change' );
    }
 
 } );
