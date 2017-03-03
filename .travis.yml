@@ -2,12 +2,12 @@ language: node_js
 sudo: false
 node_js:
    - "node" # latest
-matrix:
-   - env: BROWSER="phantomjs"
-   - env: BROWSER="chrome"
-   - env: BROWSER="firefox"
-   - env: BROWSER="internet explorer"
-   - env: BROWSER="safari"
+env:
+   - BROWSER="phantomjs"
+   - BROWSER="chrome"
+   - BROWSER="firefox"
+   - BROWSER="internet explorer"
+   - BROWSER="safari"
 notifications:
    irc:
       channels: "chat.freenode.net#laxarjs"
