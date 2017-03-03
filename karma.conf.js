@@ -4,6 +4,7 @@ module.exports = function( config ) {
    config.set( karmaConfig() );
 };
 
+var laxarInfrastructure = require( './laxar-infrastructure' );
 var path = require( 'path' );
 
 var resolve = function(p) { return path.join( path.dirname( __filename ), p ); };
@@ -19,47 +20,16 @@ var assetsPatterns = [
 
 function karmaConfig() {
 
-   var browsers = [
-      'PhantomJS',
-      'Firefox',
-      process.env.TRAVIS ? 'ChromeTravisCi' : 'Chrome'
-   ];
+   const base = laxarInfrastructure.karma( {
+      context: __dirname
+   } );
 
-   return {
-      frameworks: [ 'jasmine' ],
+   return Object.assign( {}, base, {
       files: files( specsPattern, [ polyfillsPath ], assetsPatterns ),
       preprocessors: {
          [ specsPattern ]: [ 'webpack', 'sourcemap' ]
-      },
-      proxies: {},
-      webpack: webpackConfig(),
-      webpackMiddleware: {
-         noInfo: true,
-         quiet: true
-      },
-
-      //reporters: [ 'progress' ],
-      //port: 9876,
-      browsers: browsers,
-      customLaunchers: {
-         ChromeTravisCi: {
-            base: 'Chrome',
-            flags: [ '--no-sandbox' ]
-         }
-      },
-      browserNoActivityTimeout: 100000,
-      singleRun: true,
-      autoWatch: false
-   };
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function webpackConfig() {
-   return require( './webpack.config.js' ).webpack( {
-      context: __dirname,
-      devtool: 'inline-source-map'
-   } ).config();
+      }
+   } );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
