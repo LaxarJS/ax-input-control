@@ -86,6 +86,7 @@ function webpack( options ) {
 
 function karma( options ) {
    const browsers = [];
+   const reporters = [ 'progress' ];
    const isSauceAvailable = !!(process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY);
 
    if( process.env.BROWSER ) {
@@ -111,6 +112,10 @@ function karma( options ) {
       browsers.push( 'PhantomJS' );
    }
 
+   if( process.env.TRAVIS && isSauceAvailable ) {
+      reporters.push( 'saucelabs' );
+   }
+
    return {
       browsers,
       frameworks: [ 'jasmine' ],
@@ -118,6 +123,7 @@ function karma( options ) {
 
       },
       proxies: {},
+      reporters,
       webpack: webpack( options ).config(),
       webpackMiddleware: {
          noInfo: true,
