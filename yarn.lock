@@ -2112,9 +2112,9 @@ laxar-angular-adapter@^2.0.0-alpha.1:
   dependencies:
     page "^1.7.1"
 
-laxar-infrastructure@^0.1.0-alpha.0:
-  version "0.1.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/laxar-infrastructure/-/laxar-infrastructure-0.1.0-alpha.0.tgz#5acfcec94a99223395a06c04461ea1e1889e8d3a"
+laxar-infrastructure@^0.1.0-alpha.1:
+  version "0.1.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/laxar-infrastructure/-/laxar-infrastructure-0.1.0-alpha.1.tgz#906658776ce8c3979fc78acb0724b61197bc606e"
   dependencies:
     eslint "^3.0.1"
     eslint-config-laxarjs "^0.3.0"
@@ -2132,9 +2132,9 @@ laxar-infrastructure@^0.1.0-alpha.0:
     source-map-support "^0.4.10"
     webpack-jasmine-html-runner-plugin "^0.7.0"
 
-laxar-uikit@^2.0.0-alpha.3:
-  version "2.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/laxar-uikit/-/laxar-uikit-2.0.0-alpha.3.tgz#b0fd6c84c2c1cff524e1fbc7ee4df3ecbd0bfd98"
+laxar-uikit@^2.0.0-alpha.4:
+  version "2.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/laxar-uikit/-/laxar-uikit-2.0.0-alpha.4.tgz#08738755d1fd5c131b4a8ac091cfcd693789d025"
   dependencies:
     bootstrap-sass "~3.3.7"
     font-awesome "~4.7.0"

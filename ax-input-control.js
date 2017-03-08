@@ -665,16 +665,7 @@ define( [
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       function getFormattingOptions( formattingProvider ) {
-         var i18n = ui.i18n.create( axI18n );
-         var momentFormat = axI18n.localize( i18n.momentFormats );
-         var numberFormat = axI18n.localize( i18n.numberFormats );
-         var format = ax.object.options( {
-            decimalSeparator: numberFormat.d,
-            groupingSeparator: numberFormat.g,
-            dateFormat: momentFormat.date,
-            timeFormat: momentFormat.time
-         }, DEFAULT_FORMATTING );
-
+         var format = ui.localized( axI18n ).options( DEFAULT_FORMATTING );
          return ax.object.options( formattingProvider(), format );
       }
 
