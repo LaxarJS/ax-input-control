@@ -9,9 +9,7 @@ const webpack = require( 'laxar-infrastructure' ).webpack( {
    context: __dirname
 } );
 
-if( process.env.NODE_ENV === 'browser-spec' ) {
-   module.exports = webpack.browserSpec( './spec/spec_runner.js' );
-}
-else {
-   module.exports = webpack.library();
-}
+module.exports = [
+   webpack.library(),
+   webpack.browserSpec( [ './spec/laxar-input-control.spec.js', './spec/builtin-validators.spec.js' ] )
+];

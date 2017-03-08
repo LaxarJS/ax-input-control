@@ -19,7 +19,7 @@
   "scripts": {
     "prepublish": "webpack -p",
     "test": "karma start",
-    "browser-spec": "cross-env NODE_ENV=browser-spec webpack-dev-server"
+    "start": "webpack-dev-server"
   },
   "peerDependencies": {
     "angular": "^1.5.7",
@@ -34,7 +34,6 @@
     "angular-mocks": "^1.5.7",
     "angular-sanitize": "^1.5.7",
     "bootstrap": "^3.3.7",
-    "cross-env": "^3.2.3",
     "eslint": "^3.0.1",
     "eslint-config-laxarjs": "^0.3.0",
     "imports-loader": "^0.7.1",
@@ -43,7 +42,7 @@
     "karma": "^1.5.0",
     "laxar": "^2.0.0-alpha.16",
     "laxar-angular-adapter": "^2.0.0-alpha.1",
-    "laxar-infrastructure": "^0.1.0-alpha.1",
+    "laxar-infrastructure": "^0.1.0-alpha.2",
     "laxar-uikit": "^2.0.0-alpha.4",
     "moment": "^2.17.1",
     "source-map-support": "^0.4.10",

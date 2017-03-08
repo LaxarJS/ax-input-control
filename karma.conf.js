@@ -10,7 +10,7 @@ module.exports = function( config ) {
 
 function karmaConfig() {
 
-   return laxarInfrastructure.karma( [ 'spec/spec_runner.js' ], {
+   return laxarInfrastructure.karma( [ './spec/laxar-input-control.spec.js', './spec/builtin-validators.spec.js' ], {
       context: __dirname
    } );
 

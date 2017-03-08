@@ -6,7 +6,7 @@
 define( [
    '../ax-input-control',
    './helpers',
-   './builtin_validators_spec_data',
+   './builtin-validators-spec-data',
    'jquery',
    'angular',
    'angular-mocks'
