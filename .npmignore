@@ -4,5 +4,6 @@
 /test-results.xml
 /spec-output
 /lcov.info
+yarn.lock
 npm-debug.log
 .sass-cache
