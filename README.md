@@ -1,4 +1,4 @@
-# AxInputControl
+# laxar-input-control
 
 > An AngularJS directive that adds powerful interactive validation to form elements, for LaxarJS widgets.
 
@@ -16,7 +16,7 @@ To use this control you should install it into your LaxarJS v2 project:
 npm install laxar-input-control
 ```
 
-This control only works for LaxarJS widgets that are targeting AngularJS v1.
+This control only works for LaxarJS widget that are targeting AngularJS v1.
 
 
 ## Usage
