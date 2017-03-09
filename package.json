@@ -1,21 +1,21 @@
 {
-  "name": "ax-input-control",
+  "name": "laxar-input-control",
   "version": "3.0.0-pre",
   "license": "MIT",
   "keywords": [
     "LaxarJS",
     "Widget"
   ],
-  "homepage": "https://github.com/LaxarJS/ax-input-control#readme",
+  "homepage": "https://github.com/LaxarJS/laxar-input-control#readme",
   "repository": {
     "type": "https",
-    "url": "https://github.com/LaxarJS/ax-input-control.git"
+    "url": "https://github.com/LaxarJS/laxar-input-control.git"
   },
   "bugs": {
-    "url": "https://github.com/LaxarJS/ax-input-control/issues"
+    "url": "https://github.com/LaxarJS/laxar-input-control/issues"
   },
-  "main": "ax-input-control.js",
-  "browser": "dist/ax-input-control.js",
+  "main": "laxar-input-control.js",
+  "browser": "dist/laxar-input-control.js",
   "scripts": {
     "prepublish": "webpack -p",
     "start": "webpack-dev-server",

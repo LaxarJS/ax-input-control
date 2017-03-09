@@ -4,7 +4,7 @@
  * http://laxarjs.org/license
  */
 define( [
-   '../ax-input-control',
+   '../laxar-input-control',
    './helpers',
    './builtin-validators-spec-data',
    'jquery',
