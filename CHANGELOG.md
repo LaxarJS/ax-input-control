@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#31](https://github.com/LaxarJS/ax-input-control/issues/31): omit custom default formatting options (rely on Laxar UIKit defaults instead)
+
 
 ## v3.0.0-alpha.0
 

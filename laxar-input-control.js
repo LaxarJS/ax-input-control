@@ -31,18 +31,6 @@ define( [
    // Thus when changing this here, remember to change it there ...
    var EVENT_REFRESH = 'axInput._refresh';
 
-   var DEFAULT_FORMATTING = {
-      groupingSeparator: ',',
-      decimalSeparator: '.',
-      decimalPlaces: 2,
-      decimalTruncation: 'FIXED',
-      dateFormat: 'M/D/YYYY',
-      dateFallbackFormats: [ 'M/D/YY', 'D.M.YY', 'D.M.YYYY', 'YYYY-M-D' ],
-      dateTwoDigitYearWrap: 68,
-      timeFormat: 'H:m',
-      timeFallbackFormats: [ 'H', 'HHmm' ]
-   };
-
    var KNOWN_TYPES = [ 'date', 'time', 'decimal', 'integer', 'string', 'select' ];
 
    var ERROR_CLASS_REGEXP = new RegExp( '(^| )' + ERROR_CLASS + '( |$)', 'g' );
@@ -192,18 +180,19 @@ define( [
 
             var ngModelController = controllers[0];
             var axInputController = controllers[1];
-            var formattingOptions = getFormattingOptions( formattingProvider );
+            var formattingOptions = getFormattingOptions();
 
             axI18n.whenLocaleChanged( updateFormatting );
             scope.$watch( attrs.axInputFormatting, updateFormatting, true );
 
-            function formattingProvider() {
-               return scope.$eval( attrs.axInputFormatting );
+            function getFormattingOptions() {
+               var options = scope.$eval( attrs.axInputFormatting );
+               return ui.localized( axI18n ).options( options );
             }
 
             function updateFormatting( newValue, oldValue ) {
                if( newValue === oldValue ) { return; }
-               formattingOptions = getFormattingOptions( formattingProvider );
+               formattingOptions = getFormattingOptions();
                axInputController.initialize( valueType, formattingOptions );
                ngModelController.$viewValue = axInputController.format( ngModelController.$modelValue );
                runFormatters();
@@ -661,13 +650,6 @@ define( [
             }
          }
       };
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      function getFormattingOptions( formattingProvider ) {
-         var format = ui.localized( axI18n ).options( DEFAULT_FORMATTING );
-         return ax.object.options( formattingProvider(), format );
-      }
 
    } ];
 
