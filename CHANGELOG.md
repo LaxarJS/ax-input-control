@@ -2,6 +2,7 @@
 
 ## Last Changes
 
+- [#26](https://github.com/LaxarJS/ax-input-control/issues/26): documentation: improved date example
 - [#31](https://github.com/LaxarJS/ax-input-control/issues/31): omit custom default formatting options (rely on Laxar UIKit defaults instead)
 
 

@@ -13,7 +13,7 @@ Additionally the input field and its label (associated through nesting or by `fo
 To use this control you should install it into your LaxarJS v2 project:
 
 ```console
-npm install laxar-input-control
+npm install --save laxar-input-control
 ```
 
 This control only works for LaxarJS widget that are targeting AngularJS v1.
@@ -28,21 +28,27 @@ Supported value types for `ax-input` are `string`, `decimal`, `integer`, `date` 
 ### Examples
 
 A required decimal input with maximum value:
+
 ```js
 <input ng-model="someDecimal"
        ax-input="decimal"
        ax-input-maximum-value="100000"
        ax-input-required="true">
 ```
-A date input with value range and date picker control:
+
+A date input with value range and date picker UI.
+The latter requires the [laxar-date-picker-control](https://github.com/LaxarJS/ax-date-picker-control/):
+
 ```js
 <input ng-model="someDate"
        ax-input="date"
        ax-input-range="'2010-01-02, 2014-03-01'"
        ax-input-required="true"
-       ax-datepicker>
+       ax-date-picker>
 ```
+
 A decimal input with special formatting:
+
 ```js
 <input ng-model="someDecimal"
        ax-input="decimal"
