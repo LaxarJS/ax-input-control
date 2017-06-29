@@ -2,6 +2,9 @@
 
 ## Last Changes
 
+
+## v3.0.0
+
 - [#32](https://github.com/LaxarJS/laxar-input-control/issues/32): renamed repository to match artifact
 - [#26](https://github.com/LaxarJS/laxar-input-control/issues/26): documentation: improved date example
 - [#31](https://github.com/LaxarJS/laxar-input-control/issues/31): omit custom default formatting options (rely on Laxar UIKit defaults instead)
