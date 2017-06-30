@@ -10,6 +10,7 @@ const laxarInfrastructure = require( 'laxar-infrastructure' );
 
 module.exports = function( config ) {
    const conf = karmaConfig();
+//    console.log( conf );
    config.set( conf );
 };
 

@@ -9,7 +9,10 @@ const pkg = require( './package.json' );
 const path = require( 'path' );
 
 const webpack = require( 'laxar-infrastructure' ).webpack( {
-   context: __dirname
+   context: __dirname,
+   modules: {
+      rules: []
+   }
 } );
 
 module.exports = [
