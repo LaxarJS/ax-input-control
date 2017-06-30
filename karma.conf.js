@@ -9,12 +9,13 @@ const pkg = require( './package.json' );
 const laxarInfrastructure = require( 'laxar-infrastructure' );
 
 module.exports = function( config ) {
-   config.set( karmaConfig() );
+   const conf = karmaConfig();
+   console.log( 'CONF: ', conf );
+   config.set( conf );
 };
 
 function karmaConfig() {
    return laxarInfrastructure.karma( [
-         './node_modules/laxar/dist/polyfills.js',
          './spec/laxar-input-control.spec.js',
          './spec/builtin-validators.spec.js'
       ], {

@@ -9,7 +9,18 @@ const pkg = require( './package.json' );
 const path = require( 'path' );
 
 const webpack = require( 'laxar-infrastructure' ).webpack( {
-   context: __dirname
+   context: __dirname,
+    module: {
+      rules: [
+         {
+            test: /\.js$/,
+            exclude: [
+               path.resolve( __dirname, 'node_modules' )
+            ],
+            loader: 'babel-loader'
+         }
+      ]
+   }
 } );
 
 module.exports = [
