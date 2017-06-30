@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#33](https://github.com/LaxarJS/laxar-input-control/issues/33): added polyfills to karma test (fix MSIE11)
+
 
 ## v3.0.0
 

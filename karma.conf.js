@@ -5,12 +5,22 @@
  */
 /* eslint-env node */
 
+const pkg = require( './package.json' );
 const laxarInfrastructure = require( 'laxar-infrastructure' );
 
-module.exports = config => {
-   config.set(
-      laxarInfrastructure.karma( [ './spec/laxar-input-control.spec.js', './spec/builtin-validators.spec.js' ], {
-         context: __dirname
-      } )
-   );
+module.exports = function( config ) {
+   config.set( karmaConfig() );
 };
+
+function karmaConfig() {
+   return laxarInfrastructure.karma( [
+         './node_modules/laxar/dist/polyfills.js',
+         './spec/laxar-input-control.spec.js',
+         './spec/builtin-validators.spec.js'
+      ], {
+      context: __dirname,
+      module: {
+         rules: require( './webpack.config' )[ 0 ].module.rules
+      }
+   } );
+}

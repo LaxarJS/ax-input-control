@@ -5,11 +5,17 @@
  */
 /* eslint-env node */
 
+const pkg = require( './package.json' );
+const path = require( 'path' );
+
 const webpack = require( 'laxar-infrastructure' ).webpack( {
    context: __dirname
 } );
 
 module.exports = [
    webpack.library(),
-   webpack.browserSpec( [ './spec/laxar-input-control.spec.js', './spec/builtin-validators.spec.js' ] )
+   webpack.browserSpec( [
+      './spec/laxar-input-control.spec.js',
+      './spec/builtin-validators.spec.js'
+   ] )
 ];
