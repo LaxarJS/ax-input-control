@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#33](https://github.com/LaxarJS/laxar-input-control/issues/33): disabled MSIE build for now
+
 
 ## v3.0.0
 

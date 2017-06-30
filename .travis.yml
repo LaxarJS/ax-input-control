@@ -6,7 +6,8 @@ env:
    - BROWSER="phantomjs"
    - BROWSER="chrome"
    - BROWSER="firefox"
-   - BROWSER="internet explorer"
+#    see #33
+#    - BROWSER="internet explorer"
    - BROWSER="safari"
 notifications:
    irc:
