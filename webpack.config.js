@@ -9,18 +9,7 @@ const pkg = require( './package.json' );
 const path = require( 'path' );
 
 const webpack = require( 'laxar-infrastructure' ).webpack( {
-   context: __dirname,
-    module: {
-      rules: [
-         {
-            test: /\.js$/,
-            exclude: [
-               path.resolve( __dirname, 'node_modules' )
-            ],
-            loader: 'babel-loader'
-         }
-      ]
-   }
+   context: __dirname
 } );
 
 module.exports = [
@@ -28,5 +17,7 @@ module.exports = [
    webpack.browserSpec( [
       './spec/laxar-input-control.spec.js',
       './spec/builtin-validators.spec.js'
-   ] )
+   ], {
+       includePaths: [ './node_modules/laxar/dist/polyfills.js' ]
+   } )
 ];
